@@ -38,28 +38,26 @@ Check all geneIDs in library annotation file against GeneBank and get up-to-date
 Since information in data bases can change it is prudent
 to refresh the library annotation from time to time.
 This function takes every geneID in an annotation file and checks its current status
-in GeneBank: whether is was withdrawn or replaced (and if so, by what new geneID)
-Once the geneIDs are updated, two new queries are sent to GeneBank.
-The first retrieves the current gene symbol, gene description, map location,
+in GeneBank: whether is was withdrawn or replaced (and if so, by what new geneID).
+It then queries Genebank again to retrieve the gene type (protein-coding, pseudogene, etc.).
+Once the geneIDs are updated, yet another query is sent to GeneBank
+to retrieve the current gene symbol, gene description, map location,
 chromosome number, and aliases of all geneIDs.
-The other query retrieves the gene type (protein-coding, pseudogene, etc.).
 
 Old geneIDs and gene symbols are kept in separate columsn, e.g. \code{old_geneid}.
 }
 \section{Functions}{
 \itemize{
-\item \code{check_geneid_status}: checks a single geneID and returns its gene type (protein-coding, pseudo, etc.),
-withdrawn and replaced status (TRUE/FALSE), and a potential new geneID;
+\item \code{check_geneid_status}: checks a single geneID and retrieves its withdrawn and replaced status (TRUE/FALSE)
+and a potential new geneID; then retrieves the gene type (protein-coding, pseudo, etc.)
 returns a character vector
 
 \item \code{check_geneids}: runs \code{check_geneid_status} for all geneIDs and returns a \code{data.frame};
-pauses for 1 second before each request to avoid suspicion of DDOS attack
+pauses for 0.5 second before each request to avoid suspicion of DDOS attack
 
-\item \code{get_gene_fields}: queries the gene data base twice;
-first retrieves five fields:
+\item \code{get_gene_fields}: queries the gene data base and retrieves five fields:
 gene symbol, gene description, map location, chromosome number, and aliases
 (other geneIDs associated with the geneID);
-then retrieves gene type
 
 \item \code{get_gene_fields_batch}: runs \code{get_gene_fields} in batches of 499 and less; this is necessary as
 the results of \code{reutils::efetch} are unworkable for larger sets
@@ -92,7 +90,7 @@ Four internal functions are called here, see \code{Functions}.
 \code{check_geneid_status}
 queries GeneBank one geneID at a time, which may appear
 as a DDOS attack if there are too many geneIDs to check.
-Hence, a 1 second pause is introduced before every query.
+Hence, a 0.5 second pause is introduced before every query.
 }
 
 \keyword{internal}
