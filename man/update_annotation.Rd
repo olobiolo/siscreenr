@@ -20,7 +20,7 @@ get_gene_fields_batch(geneIDs)
 }
 \arguments{
 \item{infile}{file containing the original annotation;
-must be compatible with \code{[data.table]{fread}};
+must be compatible with \code{\link[data.table]{fread}};
 deafults to internally sotred Dharmacon annotation from 16th May 2015}
 
 \item{outfile}{(optional) path to a file to save the updated annotation}
@@ -65,7 +65,7 @@ the results of \code{reutils::efetch} are unworkable for larger sets
 
 \section{File format}{
 
-As of version 2.4.0 the function has undergone some generalization.
+As of version 2.4 the function has undergone some generalization.
 It now serves not only the original Dharmacon file but also other text files.
 The input file may be tab- or comma delimited.
 It must contain the following information:
@@ -81,7 +81,8 @@ rather than the updated ones.
 
 GeneBank queries are handled with the package \code{reutils}.
 Data is loaded (and saved) with package \code{data.table}.
-Data processing is done with the (minimal) use of \code{dplyr} and \code{tidyr}.
+Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
+Some errors are handled with \code{\link[retry]{acutils::retry}}.
 Four internal functions are called here, see \code{Functions}.
 }
 

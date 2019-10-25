@@ -14,7 +14,7 @@
 #' Old geneIDs and gene symbols are kept in separate columsn, e.g. \code{old_geneid}.
 #'
 #' @section File format:
-#' As of version 2.4.0 the function has undergone some generalization.
+#' As of version 2.4 the function has undergone some generalization.
 #' It now serves not only the original Dharmacon file but also other text files.
 #' The input file may be tab- or comma delimited.
 #' It must contain the following information:
@@ -28,7 +28,8 @@
 #' @section Dependencies:
 #' GeneBank queries are handled with the package \code{reutils}.
 #' Data is loaded (and saved) with package \code{data.table}.
-#' Data processing is done with the (minimal) use of \code{dplyr} and \code{tidyr}.
+#' Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
+#' Some errors are handled with \code{\link[retry]{acutils::retry}}.
 #' Four internal functions are called here, see \code{Functions}.
 #'
 #' @section Processing time:
@@ -38,7 +39,7 @@
 #' Hence, a 0.5 second pause is introduced before every query.
 #'
 #' @param infile file containing the original annotation;
-#'               must be compatible with \code{[data.table]{fread}};
+#'               must be compatible with \code{\link[data.table]{fread}};
 #'               deafults to internally sotred Dharmacon annotation from 16th May 2015
 #' @param outfile (optional) path to a file to save the updated annotation
 #' @param verbose print function progeress as messages or not
@@ -221,22 +222,24 @@ check_geneid_status <- function(geneID) {
       } else NA_character_
 
   Sys.sleep(0.5)
-  # define a function to extract gene type from the gene type field
+  # function that does the actual extraction with provisions
+  # in case the field does not exist or is NA
   extract_field <- function(x) {
-    tryCatch(x[2], error = function(e) return('unknown gene type'))
-    if (is.na(x[2])) return('unknown gene type') else return(x[2])
+    tryCatch(x[[1]][2], error = function(e) return('unknown gene type'))
+    if (is.na(x[[1]][2])) return('unknown gene type') else return(x[[1]][2])
   }
   # get gene type
   efetch_object <- reutils::efetch(geneID, db = 'gene')
   efetch_text <- reutils::content(efetch_object, as = 'text')
   efetch_text_split <- strsplit(efetch_text, '\n')[[1]]
-  gene_type_fields <- grep('gene_type', efetch_text_split, value = TRUE)
-  gene_type_fields_split <- strsplit(gene_type_fields, '\"')
-  gene_type <- vapply(gene_type_fields_split, extract_field, character(1))
+  gene_type_field <- grep('gene_type', efetch_text_split, value = TRUE)
+  gene_type_field_split <- strsplit(gene_type_field, '\"')
+  gene_type <- extract_field(gene_type_field_split)
 
-  return(c(geneid = as.character(geneID), withdrawn = withdrawn, replaced = replaced
-           , gene_type = gene_type
-           ))
+  result <- c(geneid = as.character(geneID), withdrawn = withdrawn, replaced = replaced
+              , gene_type = gene_type
+  )
+  if (length(result) == 4) return(result) else browser()
 }
 
 #' @describeIn update_annotation
