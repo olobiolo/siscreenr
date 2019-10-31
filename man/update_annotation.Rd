@@ -6,6 +6,8 @@
 \alias{check_geneids}
 \alias{get_gene_fields}
 \alias{get_gene_fields_batch}
+\alias{get_gene_type}
+\alias{extract_field}
 \title{update library annotation}
 \usage{
 update_annotation(infile, outfile, verbose = FALSE)
@@ -17,18 +19,23 @@ check_geneids(geneIDs)
 get_gene_fields(geneIDs)
 
 get_gene_fields_batch(geneIDs)
+
+get_gene_type(geneID)
+
+extract_field(x)
 }
 \arguments{
 \item{infile}{file containing the original annotation;
 must be compatible with \code{\link[data.table]{fread}};
-deafults to internally sotred Dharmacon annotation from 16th May 2015}
+deafults to internally sotred Dharmacon annotation from 16th May 2015
+(plate numbers have been unified, originally each subset was numbered independently)}
 
 \item{outfile}{(optional) path to a file to save the updated annotation}
 
-\item{verbose}{print function progeress as messages or not}
+\item{verbose}{logical whether or not to report function progres}
 }
 \value{
-The function either invisibly returns the updated annotation
+The function either invisibly returns a data frame
         or saves to a specified path and returns nothing.
 }
 \description{
@@ -38,22 +45,22 @@ Check all geneIDs in library annotation file against GeneBank and get up-to-date
 Since information in data bases can change it is prudent
 to refresh the library annotation from time to time.
 This function takes every geneID in an annotation file and checks its current status
-in GeneBank: whether is was withdrawn or replaced (and if so, by what new geneID).
+in GeneBank: whether is has been withdrawn or replaced (and if so, by what new geneID).
 It then queries Genebank again to retrieve the gene type (protein-coding, pseudogene, etc.).
 Once the geneIDs are updated, yet another query is sent to GeneBank
 to retrieve the current gene symbol, gene description, map location,
-chromosome number, and aliases of all geneIDs.
+chromosome number, and aliases. This is done in batches of up to 499 items at a time.
 
-Old geneIDs and gene symbols are kept in separate columsn, e.g. \code{old_geneid}.
+Old geneIDs and gene symbols are kept in separate columns, e.g. \code{old_geneid}.
 }
 \section{Functions}{
 \itemize{
 \item \code{check_geneid_status}: checks a single geneID and retrieves its withdrawn and replaced status (TRUE/FALSE)
-and a potential new geneID; then retrieves the gene type (protein-coding, pseudo, etc.)
-returns a character vector
+and a potential new geneID; then retrieves the gene type (protein-coding, pseudo, etc.);
+there is a 1 second pause between queries; returns a character vector
 
 \item \code{check_geneids}: runs \code{check_geneid_status} for all geneIDs and returns a \code{data.frame};
-pauses for 0.5 second before each request to avoid suspicion of DDOS attack
+pauses for 0.5 second before each request to avoid swamping the server
 
 \item \code{get_gene_fields}: queries the gene data base and retrieves five fields:
 gene symbol, gene description, map location, chromosome number, and aliases
@@ -61,6 +68,11 @@ gene symbol, gene description, map location, chromosome number, and aliases
 
 \item \code{get_gene_fields_batch}: runs \code{get_gene_fields} in batches of 499 and less; this is necessary as
 the results of \code{reutils::efetch} are unworkable for larger sets
+
+\item \code{get_gene_type}: queries the gene data base and retrieves the gene type field
+
+\item \code{extract_field}: called by \code{get_gene_type} to extract the gene type
+with provisions in case the field does not exist or is NA
 }}
 
 \section{File format}{
@@ -69,7 +81,7 @@ As of version 2.4 the function has undergone some generalization.
 It now serves not only the original Dharmacon file but also other text files.
 The input file may be tab- or comma delimited.
 It must contain the following information:
-plate number, well/position (e.g. A01), geneID and gene symbol.
+plate number, well/position (e.g. A01), and geneID.
 All other columns are immaterial but will not be dropped.
 
 Annotation files can be updated again. In that case the columns \code{old_geneid}
@@ -83,14 +95,13 @@ GeneBank queries are handled with the package \code{reutils}.
 Data is loaded (and saved) with package \code{data.table}.
 Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
 Some errors are handled with \code{\link[retry]{acutils::retry}}.
-Four internal functions are called here, see \code{Functions}.
+Several internal functions are called here, see \code{Functions}.
 }
 
 \section{Processing time}{
 
 \code{check_geneid_status}
-queries GeneBank one geneID at a time, which may appear
-as a DDOS attack if there are too many geneIDs to check.
+queries GeneBank one geneID at a time, which may swamp the server.
 Hence, a 0.5 second pause is introduced before every query.
 }
 

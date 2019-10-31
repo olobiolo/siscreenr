@@ -1,6 +1,6 @@
 Package: siscreenr
 Title: Analyze Genome-Wide siRNA Screening Campaigns
-Version: 2.5.2
+Version: 2.6.0
 Authors@R: 
     person(given = "Aleksander",
            family = "Chlebowski",

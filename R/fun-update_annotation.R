@@ -5,20 +5,20 @@
 #' Since information in data bases can change it is prudent
 #' to refresh the library annotation from time to time.
 #' This function takes every geneID in an annotation file and checks its current status
-#' in GeneBank: whether is was withdrawn or replaced (and if so, by what new geneID).
+#' in GeneBank: whether is has been withdrawn or replaced (and if so, by what new geneID).
 #' It then queries Genebank again to retrieve the gene type (protein-coding, pseudogene, etc.).
 #' Once the geneIDs are updated, yet another query is sent to GeneBank
 #' to retrieve the current gene symbol, gene description, map location,
-#' chromosome number, and aliases of all geneIDs.
+#' chromosome number, and aliases. This is done in batches of up to 499 items at a time.
 #'
-#' Old geneIDs and gene symbols are kept in separate columsn, e.g. \code{old_geneid}.
+#' Old geneIDs and gene symbols are kept in separate columns, e.g. \code{old_geneid}.
 #'
 #' @section File format:
 #' As of version 2.4 the function has undergone some generalization.
 #' It now serves not only the original Dharmacon file but also other text files.
 #' The input file may be tab- or comma delimited.
 #' It must contain the following information:
-#' plate number, well/position (e.g. A01), geneID and gene symbol.
+#' plate number, well/position (e.g. A01), and geneID.
 #' All other columns are immaterial but will not be dropped.
 #'
 #' Annotation files can be updated again. In that case the columns \code{old_geneid}
@@ -30,36 +30,56 @@
 #' Data is loaded (and saved) with package \code{data.table}.
 #' Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
 #' Some errors are handled with \code{\link[retry]{acutils::retry}}.
-#' Four internal functions are called here, see \code{Functions}.
+#' Several internal functions are called here, see \code{Functions}.
 #'
 #' @section Processing time:
 #' \code{check_geneid_status}
-#' queries GeneBank one geneID at a time, which may appear
-#' as a DDOS attack if there are too many geneIDs to check.
+#' queries GeneBank one geneID at a time, which may swamp the server.
 #' Hence, a 0.5 second pause is introduced before every query.
 #'
 #' @param infile file containing the original annotation;
 #'               must be compatible with \code{\link[data.table]{fread}};
 #'               deafults to internally sotred Dharmacon annotation from 16th May 2015
+#'               (plate numbers have been unified, originally each subset was numbered independently)
 #' @param outfile (optional) path to a file to save the updated annotation
-#' @param verbose print function progeress as messages or not
+#' @param verbose logical whether or not to report function progres
 #'
-#' @return The function either invisibly returns the updated annotation
+#' @return The function either invisibly returns a data frame
 #'         or saves to a specified path and returns nothing.
 #'
 #' @export
 #'
 
 update_annotation <- function(infile, outfile, verbose = FALSE) {
+  # check if infile exists
   if (!missing(infile) && !file.exists(infile)) stop('"infile" not found')
-  # check if outfile is valid - but how? if it's the same as infile it could be overwritten...
-
+  # check if infile is different from outfile
+  if (!missing(infile) & !missing(outfile)) {
+    if (infile == outfile) {
+      warning('"infile" will be overwritten!', immediate. = TRUE)
+      what.do <- readline('continue? (Yes/No) ')
+      if (is.element(what.do, c('No', 'no', 'N', 'n')))
+        stop('interrupted by user', call. = FALSE) else
+          if (what.do != 'Yes') stop('invalid choice')
+    }
+  }
+  # check if outfile can be created (only in different to infile)
+  if (!missing(outfile) & !missing(outfile)) {
+    if (infile != outfile) {
+      tryCatch(file.create(outfile),
+               message = function(m) stop('there is a problem with creating "outfile"', call. = FALSE),
+               warning = function(w) stop('there is a problem with creating "outfile"', call. = FALSE),
+               error = function(e) stop('there is a problem with creating "outfile"', call. = FALSE)
+      )}
+  }
   # load original annotation
   if (verbose) message('loading annotation')
-  if (missing(infile)) infile <- 'extdata/ANNOTATION.LIBRARY.GENOMIC_20150416.original.txt'
+  if (missing(infile))
+    infile <- 'extdata/ANNOTATION.LIBRARY.GENOMIC_20150416.original.plates.adjusted.txt'
   annotation_original <- data.table::fread(file = infile, check.names = TRUE)
   # data.table class will cause problems later on
   annotation_original <- as.data.frame(annotation_original)
+  # check if file format is valid?
 
   # change column names to lower case
   nms <- tolower(names(annotation_original))
@@ -87,17 +107,18 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
     replacer <- function(x, string, replacement, error, error2) {
       ind <- grep(string, x)
       if (length(ind) == 1) x[ind] <- replacement else
-        if (length(ind) == 0) stop(error, call. = FALSE) else
+        if (length(ind) == 0) stop(error, msg, replacement, call. = FALSE) else
           stop(error2, call. = FALSE)
       return(x)
     }
     # create vectors of regexs, replacements, and error messages
-    strings <- c('^wells?|^positions?', 'gene[-,_,\\., ]?symbols?', 'gene[-,_,\\., ]?ids?')
-    replacements <- c('position', 'genesymbol', 'geneid')
+    strings <- c('^plate[-,_,\\., ]?(no|num|number)?', '^wells?|^positions?', 'gene[-,_,\\., ]?ids?')
+    replacements <- c('plate', 'position', 'geneid')
     errors <- paste('"data" contains no apparent specification of',
-                    c('position', 'gene symbols', 'gene ids'))
+                    c('plate numbers', 'position', 'gene ids'))
     errors2 <- paste('"data" contains ambiguous specification of',
-                     c('position', 'gene symbols', 'gene ids'))
+                     c('plate numbers', 'position', 'gene ids'))
+    msg <- "\n\ttry: "
     # run the function across the column names
     for (i in seq_along(strings)) {
       nms <- replacer(nms, strings[i], replacements[i], errors[i], errors2[i])
@@ -135,7 +156,7 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
   fields <- get_gene_fields_batch(geneids)
   # append fields to amended annotation
   if (verbose) message('appending to annotation...')
-  annotations_merged <- merge(annotation_checked, fields, by = 'geneid')
+  annotations_merged <- merge(annotation_checked, fields, by = 'geneid', all = TRUE)
   # update annotation
   if (verbose) message('formatting annotation...')
   annotation_updated <- annotations_merged
@@ -205,8 +226,8 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
 
 #' @describeIn update_annotation
 #' checks a single geneID and retrieves its withdrawn and replaced status (TRUE/FALSE)
-#' and a potential new geneID; then retrieves the gene type (protein-coding, pseudo, etc.)
-#' returns a character vector
+#' and a potential new geneID; then retrieves the gene type (protein-coding, pseudo, etc.);
+#' there is a 1 second pause between queries; returns a character vector
 #'
 #' @keywords internal
 #'
@@ -220,41 +241,31 @@ check_geneid_status <- function(geneID) {
     if (grepl('replaced', efetch_text)) {
       grep('replaced', unlist(strsplit(efetch_text, split = '\n')), value = TRUE)
       } else NA_character_
-
-  Sys.sleep(0.5)
-  # function that does the actual extraction with provisions
-  # in case the field does not exist or is NA
-  extract_field <- function(x) {
-    tryCatch(x[[1]][2], error = function(e) return('unknown gene type'))
-    if (is.na(x[[1]][2])) return('unknown gene type') else return(x[[1]][2])
-  }
+  # a pause here prevents some delays I do not understand
+  Sys.sleep(1)
   # get gene type
-  efetch_object <- reutils::efetch(geneID, db = 'gene')
-  efetch_text <- reutils::content(efetch_object, as = 'text')
-  efetch_text_split <- strsplit(efetch_text, '\n')[[1]]
-  gene_type_field <- grep('gene_type', efetch_text_split, value = TRUE)
-  gene_type_field_split <- strsplit(gene_type_field, '\"')
-  gene_type <- extract_field(gene_type_field_split)
-
-  result <- c(geneid = as.character(geneID), withdrawn = withdrawn, replaced = replaced
-              , gene_type = gene_type
-  )
+  V <- get('verbose', envir = sys.frame(1))
+  if (V) message('\t getting gene type')
+  gene_type <- acutils::retry(get_gene_type(geneID), 5, 'failed to retrieve', verbose = V)
+  result <- c(geneid = as.character(geneID), withdrawn = withdrawn, replaced = replaced,
+              gene_type = gene_type)
   if (length(result) == 4) return(result) else browser()
 }
 
 #' @describeIn update_annotation
 #' runs \code{check_geneid_status} for all geneIDs and returns a \code{data.frame};
-#' pauses for 0.5 second before each request to avoid suspicion of DDOS attack
+#' pauses for 0.5 second before each request to avoid swamping the server
 #'
 #' @keywords internal
 #'
 check_geneids <- function(geneIDs) {
+  V <- get('verbose', envir = sys.frame(1))
   # define function that counts iterations
   how_to_count <- function() {
     X <- length(geneIDs)
     iteration <- 1
     function() {
-      message('\t geneID ', iteration, ' of ', X, '...')
+      if (V) message('\t geneID ', iteration, ' of ', X, '...')
       iteration <<- iteration + 1
     }
   }
@@ -262,7 +273,7 @@ check_geneids <- function(geneIDs) {
   # define checkingcounting function operator for checking geneid status
   check_geneid_status_with_pause <- function(x) {
     count()
-    Sys.sleep(.5)
+    Sys.sleep(0.5)
     check_geneid_status(x)
   }
   m <- vapply(geneIDs, check_geneid_status_with_pause, character(4))
@@ -299,7 +310,6 @@ get_gene_fields <- function(geneIDs) {
   return(
     data.frame(
       geneid = as.character(geneIDs), gene_symbol, aliases, description, map_location, chromosome,
-      #gene_type,
       stringsAsFactors = F))
 }
 
@@ -310,22 +320,25 @@ get_gene_fields <- function(geneIDs) {
 #' @keywords internal
 #'
 get_gene_fields_batch <- function(geneIDs) {
+  # verbosity check
+  V <- get('verbose', envir = sys.frame(1))
   # we shall be calling efetch, which can only be done for less than 500 geneIDs at a time
   # test how many items there are
   howmany <- length(geneIDs)
   # if there area less that 500 items, a single call suffices
   if (howmany < 500) {
-    #if (verbose) message('... in one batch') # scoping not working...
+    if (V) message('\t ... in one batch') # scoping not working...
     return(get_gene_fields(geneIDs))
   } else {
     # if there are 500 or more, we shall do it in 499-item steps
     # how many steps will there be?
     steps <- ceiling(howmany / 499)
-    #if (verbose) message('... in ', steps, ' batches') # scoping not working...
+    if (V) message('\t ... in ', steps, ' batches') # scoping not working...
     # create funcion factory that will select a 499-long intervals from a long vector
     stepper <- function(step) {
       # return function that returns the i-th 499-element section of x
       function(x) {
+        if (V) message('\t\t batch ', step)
         X <- x[1:499 + 499 * (step -1)]
         X[!is.na(X)]
       }
@@ -340,4 +353,30 @@ get_gene_fields_batch <- function(geneIDs) {
     # wrap into single data frame
     return(do.call(rbind, parts))
   }
+}
+
+#' @describeIn update_annotation
+#' queries the gene data base and retrieves the gene type field
+#'
+#' @keywords internal
+#'
+get_gene_type <- function(geneID) {
+  efetch_object <- reutils::efetch(geneID, db = 'gene')
+  efetch_text <- reutils::content(efetch_object, as = 'text')
+  if (is.null(efetch_text)) stop('efetch returned NULL')
+  efetch_text_split <- strsplit(efetch_text, '\n')[[1]]
+  gene_type_field <- grep('gene_type', efetch_text_split, value = TRUE)
+  gene_type_field_split <- strsplit(gene_type_field, '\"')
+  extract_field(gene_type_field_split)
+}
+
+#' @describeIn update_annotation
+#' called by \code{get_gene_type} to extract the gene type
+#' with provisions in case the field does not exist or is NA
+#'
+#' @keywords internal
+#'
+extract_field <- function(x) {
+  tryCatch(x[[1]][2], error = function(e) return('unknown gene type'))
+  if (is.na(x[[1]][2])) return('unknown gene type') else return(x[[1]][2])
 }
