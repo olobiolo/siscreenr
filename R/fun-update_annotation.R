@@ -11,7 +11,7 @@
 #' to retrieve the current gene symbol, gene description, map location,
 #' chromosome number, and aliases. This is done in batches of up to 499 items at a time.
 #'
-#' Old geneIDs and gene symbols are kept in separate columns, e.g. \code{old_geneid}.
+#' Old geneIDs are kept in a separate column, \code{old_geneid}.
 #'
 #' @section File format:
 #' As of version 2.4 the function has undergone some generalization.
@@ -79,7 +79,8 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
   annotation_original <- data.table::fread(file = infile, check.names = TRUE)
   # data.table class will cause problems later on
   annotation_original <- as.data.frame(annotation_original)
-  # check if file format is valid?
+
+  # TODO: check if file format is valid
 
   # change column names to lower case
   nms <- tolower(names(annotation_original))
@@ -87,28 +88,25 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
   # these columns are added during the update
   # if they are all here already, it means the file was previously updated
   added_columns <- c('gene_type', 'withdrawn', 'replaced', 'gene_symbol',
-                     'description', 'map_location', 'chromosome', 'aliases',
-                     'old_gene_symbol', 'old_geneid')
+                     'description', 'map_location', 'chromosome', 'aliases', 'old_geneid')
 
   if (all(is.element(added_columns, nms))) {
     ## if the file has undergone a previous update
-    # hold on to "old geneids" and "old gene symbols"
+    # hold on to "old geneids"
     hold_geneid <- annotation_original$old_geneid
-    hold_gene_symbol <- annotation_original$old_gene_symbol
     # remove all added variables
     ind <- !is.element(nms, added_columns)
     annotation_original <- annotation_original[ind]
     # restore old geneids and gene symbols
     annotation_original$geneid <- hold_geneid
-    annotation_original$genesymbol <- hold_gene_symbol
   } else {
     ## if this is a new file, the format must be unified
     # define a function
     replacer <- function(x, string, replacement, error, error2) {
       ind <- grep(string, x)
       if (length(ind) == 1) x[ind] <- replacement else
-        if (length(ind) == 0) stop(error, msg, replacement, call. = FALSE) else
-          stop(error2, call. = FALSE)
+        if (length(ind) == 0) stop(error, "\n\ttry: ", replacement, call. = FALSE) else
+          stop(error2, ':\n\t', paste(x[ind], collapse = ', '), call. = FALSE)
       return(x)
     }
     # create vectors of regexs, replacements, and error messages
@@ -118,14 +116,15 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
                     c('plate numbers', 'position', 'gene ids'))
     errors2 <- paste('"data" contains ambiguous specification of',
                      c('plate numbers', 'position', 'gene ids'))
-    msg <- "\n\ttry: "
     # run the function across the column names
     for (i in seq_along(strings)) {
       nms <- replacer(nms, strings[i], replacements[i], errors[i], errors2[i])
     }
     # replace column names
     names(annotation_original) <- nms
-    ### required column names are now present
+    ## required column names are now present
+    # drop gene symbol columnm if present
+    annotation_original[grepl('gene.?symbols?', names(annotation_original), ignore.case = TRUE)] <- NULL
   }
 
   # change geneids to character, required for merging later
@@ -162,7 +161,6 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
   annotation_updated <- annotations_merged
   # update names
   nms <- names(annotation_updated)
-  nms[grepl('gene\\.?symbol', nms)] <- 'old_gene_symbol'
   nms[grepl('duplex.?catalog.?number', nms)] <- 'duplex_catalog_number'
   nms[grepl('pool.?catalog.?number', nms)] <- 'pool_catalog_number'
   nms[grepl('gene.?accession', nms)] <- 'gene_accession'
@@ -170,35 +168,36 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
   # modify "plate" and "position" columns
   annotation_updated$plate <- as.numeric(gsub('[P,p]late[_,-,\\., ]?', '', annotation_updated$plate))
   annotation_updated$position <- toupper(annotation_updated$position)
-  # for each plate/position wrap contents of "sequence" into single strings
+
+  # function that wraps several fields in a column into a single string
+  wrap <- function(column) {
+    f <- list(annotation_updated$plate, annotation_updated$position)
+    wrapped <- tapply(annotation_updated[[column]], f, FUN = paste, collapse = ', ')
+    wrapped <- unsplit(wrapped, f)
+    annotation_updated[[paste0(column, 's')]] <- wrapped
+    ind <- !is.element(names(annotation_updated), column)
+    annotation_updated <- annotation_updated[ind]
+    return(annotation_updated)
+  }
+  # apply function to column "sequence"
   if (is.element('sequence', nms)) {
     if (verbose) message('\t wrapping sequences')
-    f <- list(annotation_updated$plate, annotation_updated$position)
-    sequences <- tapply(annotation_updated$sequence, f, FUN = paste, collapse = ', ')
-    sequences <- unsplit(sequences, f)
-    annotation_updated$sequences <- sequences
-    ind <- !is.element(nms, 'sequence')
-    annotation_updated <- annotation_updated[ind]
+    annotation_updated <- wrap('sequence')
   }
-  # the same for "duplex_catalog_number"
+  # and again to column "duplex_catalog_nuber
   if (is.element('duplex_catalog_number', nms)) {
-    if (verbose) message('\t wrapping duplex catalog numbers')
-    f <- list(annotation_updated$plate, annotation_updated$position)
-    duplex_catalog_numbers <-
-      tapply(annotation_updated$duplex_catalog_number, f, FUN = paste, collapse = ', ')
-    duplex_catalog_numbers <- unsplit(duplex_catalog_numbers, f)
-    annotation_updated$duplex_catalog_numbers <- duplex_catalog_numbers
-    ind <- !is.element(nms, 'duplex_catalog_number')
-    annotation_updated <- annotation_updated[ind]
+    if (verbose) message('\t wrapping duplex catalog number')
+    annotation_updated <- wrap('duplex_catalog_number')
   }
+
   # clean up duplicated rows, rearrange columns and rows
+  if (verbose) message('\t rearranging')
   annotation_updated$new_geneid <- NULL
   annotation_updated <- dplyr::select(annotation_updated, dplyr::one_of(
-    c('plate', 'position', 'geneid', 'ginumber', 'gene_accession', 'gene_symbol',
-      'aliases', 'description', 'map_location', 'chromosome', 'gene_type',
+    c('plate', 'position', 'geneid',
+      'gene_symbol', 'aliases', 'description', 'map_location', 'chromosome', 'gene_type',
       'sequences', 'duplex_catalog_numbers', 'pool_catalog_number',
-      'withdrawn', 'replaced', 'old_geneid', 'old_gene_symbol')),
-    dplyr::everything())
+      'withdrawn', 'replaced', 'old_geneid')), dplyr::everything())
   if (verbose) message('\t removing duplicate rows')
   annotation_updated <- annotation_updated[!duplicated(annotation_updated), ]
   if (verbose) message('\t reordering table')
@@ -207,12 +206,18 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
 
   # fill in "none"s and "???"s in geneID, gene symbol and description columns
   if (verbose) message('\t filling in missing values')
-  annotation_updated$gene_symbol <-
-    ifelse(annotation_updated$geneid == 'none', 'none', annotation_updated$gene_symbol)
-  annotation_updated$gene_symbol <-
-    ifelse(annotation_updated$geneid == '???', '???', annotation_updated$gene_symbol)
-  annotation_updated$description <-
-    ifelse(annotation_updated$geneid == 'none', 'none', annotation_updated$description)
+  # define function that will fill in missing values
+  infiller <- function(data, column) {
+    data[[column]] <- ifelse(data$geneid == 'none', 'none', data[[column]])
+    data[[column]] <- ifelse(data$geneid == '???', '???', data[[column]])
+    return(data)
+  }
+  # list variables that will be processed
+  fill.in <- c('gene_symbol', 'aliases', 'description',
+               'map_location', 'chromosome', 'gene_type', 'withdrawn', 'replaced')
+  # execute
+  for (f in fill.in) annotation_updated <- infiller(annotation_updated, f)
+
   # save or return result
   if (missing(outfile)) {
     if (verbose) message('finished')

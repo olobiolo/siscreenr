@@ -51,7 +51,7 @@ Once the geneIDs are updated, yet another query is sent to GeneBank
 to retrieve the current gene symbol, gene description, map location,
 chromosome number, and aliases. This is done in batches of up to 499 items at a time.
 
-Old geneIDs and gene symbols are kept in separate columns, e.g. \code{old_geneid}.
+Old geneIDs are kept in a separate column, \code{old_geneid}.
 }
 \section{Functions}{
 \itemize{
