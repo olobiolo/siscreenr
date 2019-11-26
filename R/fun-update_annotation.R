@@ -30,6 +30,7 @@
 #' Data is loaded (and saved) with package \code{data.table}.
 #' Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
 #' Some errors are handled with \code{\link[retry]{acutils::retry}}.
+#' Passing arguments is done with \code{\link[retry]{acutils::get.stack}}.
 #' Several internal functions are called here, see \code{Functions}.
 #'
 #' @section Processing time:
@@ -245,11 +246,11 @@ check_geneid_status <- function(geneID) {
   replaced <-
     if (grepl('replaced', efetch_text)) {
       grep('replaced', unlist(strsplit(efetch_text, split = '\n')), value = TRUE)
-      } else NA_character_
+    } else NA_character_
   # a pause here prevents some delays I do not understand
   Sys.sleep(1)
   # get gene type
-  V <- get('verbose', envir = sys.frame(1))
+  V <- acutils::get.stack('verbose')
   if (V) message('\t getting gene type')
   gene_type <- acutils::retry(get_gene_type(geneID), 5, 'failed to retrieve', verbose = V)
   result <- c(geneid = as.character(geneID), withdrawn = withdrawn, replaced = replaced,
@@ -264,7 +265,7 @@ check_geneid_status <- function(geneID) {
 #' @keywords internal
 #'
 check_geneids <- function(geneIDs) {
-  V <- get('verbose', envir = sys.frame(1))
+  V <- acutils::get.stack('verbose')
   # define function that counts iterations
   how_to_count <- function() {
     X <- length(geneIDs)
@@ -326,7 +327,7 @@ get_gene_fields <- function(geneIDs) {
 #'
 get_gene_fields_batch <- function(geneIDs) {
   # verbosity check
-  V <- get('verbose', envir = sys.frame(1))
+  V <- acutils::get.stack('verbose')
   # we shall be calling efetch, which can only be done for less than 500 geneIDs at a time
   # test how many items there are
   howmany <- length(geneIDs)

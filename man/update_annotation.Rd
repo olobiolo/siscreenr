@@ -95,6 +95,7 @@ GeneBank queries are handled with the package \code{reutils}.
 Data is loaded (and saved) with package \code{data.table}.
 Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
 Some errors are handled with \code{\link[retry]{acutils::retry}}.
+Passing arguments is done with \code{\link[retry]{acutils::get.stack}}.
 Several internal functions are called here, see \code{Functions}.
 }
 
