@@ -37,7 +37,7 @@ The final object is returned invisibly as printing it all would be counterproduc
 The function first checks the data files present in the data directory against
 the plates logged in the screen log.
 Data files must contain full plate names as given in the screen log.
-Suffixes are allowed but must be separated by \code{_}. They will be dropped.
+Suffixes are allowed but must be separated by \code{_}.
 Unexpected and missing plates are reported.
 
 Once the plate list has been compiled, the layout file is loaded and all present

@@ -11,7 +11,7 @@
 #' The function first checks the data files present in the data directory against
 #' the plates logged in the screen log.
 #' Data files must contain full plate names as given in the screen log.
-#' Suffixes are allowed but must be separated by \code{_}. They will be dropped.
+#' Suffixes are allowed but must be separated by \code{_}.
 #' Unexpected and missing plates are reported.
 #'
 #' Once the plate list has been compiled, the layout file is loaded and all present
@@ -84,7 +84,7 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
   plates.logged <- screenlog[, 1]
   if (length(plates.logged) == 0) stop('no plates logged(?); check screen log file')
   data.files <- list.files(path = datadir)
-  plates.filed <- sapply(data.files, function(x) strsplit(x, split = '_?.*\\.txt')[[1]][1])
+  plates.filed <- sapply(data.files, function(x) strsplit(x, split = '_?\\.txt')[[1]][1])
   if (length(plates.filed) == 0) stop('no result files')
   # load a random file to test "wells" argument
   test_file <- utils::read.delim(sample(list.files(datadir, full.names = TRUE), 1), stringsAsFactors = FALSE)
