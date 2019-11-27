@@ -20,6 +20,8 @@
 #'
 #' @return The annotation table with all bad rows fixed.
 #'
+#' @export
+#'
 patch_annotation <- function(x) {
   if (is.character(x)) x <- as.data.frame(data.table::fread(x))
   good <- subset(x, gene_type != 'failed to retrieve')
@@ -47,5 +49,5 @@ patch_annotation <- function(x) {
   redone <- tochar(redone)
   corrected <- rbind(good, redone)
   corrected <- dplyr::arrange(corrected, plate, position)
-  if (any(grepl('failed to retrieve', redone$gene_type))) correct(corrected) else return(corrected)
+  if (any(grepl('failed to retrieve', redone$gene_type))) patch_annotation(corrected) else return(corrected)
 }
