@@ -57,7 +57,7 @@ File preparation:
  \code{update_annotation} update library annotation
  }
  \item{
- \code{patch_annotation} fix errors in library annotation left by 'code{update_annotation}
+ \code{patch_annotation} fix errors in library annotation left by \code{update_annotation}
  }
 }
 

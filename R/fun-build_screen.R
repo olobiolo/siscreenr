@@ -10,8 +10,8 @@
 #' @details
 #' The function first checks the data files present in the data directory against
 #' the plates logged in the screen log.
-#' Data files must contain full plate names as given in the screen log.
-#' Suffixes are allowed but must be separated by \code{_}.
+#' Data file names must begin with the full plate names as given in the screen log.
+#' Suffixes are allowed but must be separated by \code{_}. They will be discarded.
 #' Unexpected and missing plates are reported.
 #'
 #' Once the plate list has been compiled, the layout file is loaded and all present
@@ -36,9 +36,8 @@
 #' @section Log file:
 #' The screen log this must be a tab delimited file and contain columns:
 #' \code{plateno}, \code{plated}, \code{imaged}. Any number of other columns is acceptable.
-#' The plate name must be contained verbatim within the corresponding result file name.
-#' It must not contain underscores, all other (legal) characters are allowed.
-#' Anything right of an underscore will be discarded.
+#' The plate number must be contained verbatim within the corresponding result file name.
+#' Any suffixes following an underscore will be dropped.
 #'
 #' @section Layout file:
 #' The layout file must be a tab delimited file and contain columns:
@@ -63,6 +62,11 @@
 #' this may cause problems if not all wells are scanned.
 #' Also we load layout and annotation separately, the column is redundant anyway.
 #'
+#' @section Dependencies:
+#' Data files are loaded with \code{utils::read.delim}.
+#' Some operations are done with \code{tidyr}.
+#' A number of internal functions are used.
+#'
 #' @export
 #'
 
@@ -84,7 +88,7 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
   plates.logged <- screenlog[, 1]
   if (length(plates.logged) == 0) stop('no plates logged(?); check screen log file')
   data.files <- list.files(path = datadir)
-  plates.filed <- sapply(data.files, function(x) strsplit(x, split = '_?\\.txt')[[1]][1])
+  plates.filed <- sapply(data.files, function(x) strsplit(x, split = '_')[[1]][1])
   if (length(plates.filed) == 0) stop('no result files')
   # load a random file to test "wells" argument
   test_file <- utils::read.delim(sample(list.files(datadir, full.names = TRUE), 1), stringsAsFactors = FALSE)
@@ -107,56 +111,20 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
 
   # load layout
   if (verbose) cat('loading layout(s)... \n')
-  lay <- utils::read.delim(file = layout, stringsAsFactors = FALSE)
-  # check adjust format of the layout file
-  if (!is.numeric(lay$well)) stop('column "well" in layout file must be numeric')
-  lay.colnames <- names(lay)
-  if (!all(is.element(c('row', 'column'), lay.colnames))) {
-    if (!is.element('position', lay.colnames)) {
-      warning('it seems well position (row and column) is not defined in the layout file\nthis may cause problems down the line')
-    } else {
-      lay <- tidyr::separate(lay, col = 'position', sep = 1, into = c('row', 'column'),
-                             remove = F, convert = T)
-    }
-  }
-  if (is.element('date', lay.colnames) & !is.element('plated', lay.colnames)) {
-    names(lay)[lay.colnames == 'date'] <- 'plated'
-  }
+  lay <- build_screen.layout(layout)
 
   # build screen as data frame
   if (verbose) cat('building screen... \n')
   plates <- names(plates.filed[plates.filed %in% plates.logged])
   if (length(plates) == 0) stop('no result files to collate')
-
-  # define a function that will load and modify a result file
-  plate.loader <- function(x) {
-    filename <- paste0(datadir, '/', x)
-    plate.loaded <- utils::read.delim(filename)
-    plate.loaded$filename <- x
-    return(plate.loaded)
-  }
-  # apply the function over the plate list
-  prescr <- lapply(plates, plate.loader)
-
+  prescr <- lapply(plates, build_screen.load_plates, datadir)
   if (verbose) cat('collating', length(plates), 'plates', '\n')
   scr <- do.call(rbind, prescr)
 
   # removing columns if desired
   if (!missing(rem.col)) {
     if (verbose) cat('removing columns... \n')
-    cols <- colnames(scr)
-    if (is.character(rem.col)) {
-      if (!all(rem.col %in% cols)) {
-        nec <- setdiff(rem.col, cols)
-        warning('request to remove non-existing column(s): ', nec,' was ignored',
-                call. = FALSE, immediate. = TRUE)
-      }
-      rem <- intersect(rem.col, colnames(scr))
-    } else {
-      if (0 %in% rem.col) rem.col[rem.col == 0] <- length(cols) - 1
-      rem <- cols[rem.col]
-    }
-    scr <- dplyr::select(scr, -rem)
+    scr <- build_screen.remove_columns(scr, rem.col)
   }
 
   # read and reformat additional information
@@ -169,22 +137,14 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
   scr$plate <- as.numeric(gsub('[A-Z]', '', scr$plate))
   scr <- plate.type.converter(scr)
   scr <- tidyr::unite(scr, 'replica', 'replica', 'number', sep = '')
-  scr <- merge(lay, scr, all = TRUE)
+  scr <- merge(lay, scr, all.x = TRUE, all.y = FALSE)
   scr[c('plated', 'prepared', 'imaged')] <- lapply(scr[c('plated', 'prepared', 'imaged')], lubridate::ymd)
   scr$extension <- NULL
 
   # change zeros to NAs if required
   if (zero.to.NA) {
     if (verbose) cat('replacing zeros... \n')
-    na.count.before <- sum(is.na(scr))
-    zero.count <- sum(scr == 0, na.rm = TRUE)
-    scr[scr == 0] <- NA
-    na.count.after <- sum(is.na(scr))
-    if (verbose) {
-      cat(' ', na.count.before, 'NAs identified \n')
-      cat(' ', zero.count, 'zeros found and replaced in total \n')
-      cat(' ', na.count.after, 'NAs now present \n')
-    }
+    scr <- build_screen.replace_zeros(scr)
   }
 
   # reorder by plate number, replica number and well number
@@ -193,4 +153,82 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
 
   if (verbose) cat('\nready! \n')
   invisible(scr)
+}
+
+
+### internal functions
+
+
+# load layout file and check format
+build_screen.layout <- function(layout) {
+  if (!file.exists(layout)) stop('from build_screen: layout file not found')
+  lay <- utils::read.delim(file = layout, stringsAsFactors = FALSE)
+  # check adjust format of the layout file
+  if (!is.numeric(lay$well)) stop('from build_screen: column "well" in layout file must be numeric')
+  # check column names for position specification
+  lay.colnames <- names(lay)
+  if (!all(is.element(c('row', 'column'), lay.colnames))) {
+    if (!is.element('position', lay.colnames)) {
+      warning('from build_screen:
+              it seems well position (row and column) is not defined in the layout file
+              this may cause problems down the line')
+    } else {
+      lay <- tidyr::separate(lay, col = 'position', sep = 1, into = c('row', 'column'),
+                             remove = F, convert = F)
+    }
+  }
+  # if there is a column called "date" but not one called "plated", it will be renamed to such
+  if (is.element('date', lay.colnames) & !is.element('plated', lay.colnames)) {
+    names(lay)[lay.colnames == 'date'] <- 'plated'
+  }
+  return(lay)
+}
+
+# load a file, add file name to the resulting data frame and return
+build_screen.load_plates <- function(x, datadir) {
+  filename <- paste0(datadir, '/', x)
+  plate.loaded <- utils::read.delim(filename, stringsAsFactors = FALSE)
+  plate.loaded$filename <- x
+  return(plate.loaded)
+}
+
+# remove columns
+build_screen.remove_columns <- function(x, rem.col) {
+  cols <- colnames(x)
+  if (is.factor(rem.col)) rem.col <- as.character(rem.col)
+  if (is.character(rem.col)) {
+    # columns to remove that are indeed present
+    rem.present <- rem.col[is.element(rem.col, cols)]
+    # coumns to remove that are absent
+    rem.absent <- rem.col[!is.element(rem.col, cols)]
+    # throw message if some requests absent
+    if (length(rem.absent) > 0) {
+      message('from build_screen: the following columns were not found: ',
+              paste(rem.absent, collapse = ', '))
+    }
+    # remove column by setting them to NULL
+    if (length(rem.present) > 0) {
+      x[rem.present] <- NULL
+    }
+  } else if (is.numeric(rem.col)) {
+    # convert 0 to number of penultimate column
+    if (0 %in% rem.col) rem.col[rem.col == 0] <- length(cols) - 1
+    x[rem.col] <- NULL
+  }
+  return(x)
+}
+
+# change zeros to NAs
+build_screen.replace_zeros <- function(x) {
+  verbose <- get('verbose', envir = parent.frame(1))
+  na.count.before <- sum(is.na(x))
+  zero.count <- sum(x == 0, na.rm = TRUE)
+  x[x == 0] <- NA
+  na.count.after <- sum(is.na(x))
+  if (verbose) {
+    cat(' ', na.count.before, 'NAs identified \n')
+    cat(' ', zero.count, 'zeros found and replaced in total \n')
+    cat(' ', na.count.after, 'NAs now present \n')
+  }
+  return(x)
 }

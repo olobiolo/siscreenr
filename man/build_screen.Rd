@@ -36,8 +36,8 @@ The final object is returned invisibly as printing it all would be counterproduc
 \details{
 The function first checks the data files present in the data directory against
 the plates logged in the screen log.
-Data files must contain full plate names as given in the screen log.
-Suffixes are allowed but must be separated by \code{_}.
+Data file names must begin with the full plate names as given in the screen log.
+Suffixes are allowed but must be separated by \code{_}. They will be discarded.
 Unexpected and missing plates are reported.
 
 Once the plate list has been compiled, the layout file is loaded and all present
@@ -52,9 +52,8 @@ There is quite a lot of printed communication the function does, hence the \code
 
 The screen log this must be a tab delimited file and contain columns:
 \code{plateno}, \code{plated}, \code{imaged}. Any number of other columns is acceptable.
-The plate name must be contained verbatim within the corresponding result file name.
-It must not contain underscores, all other (legal) characters are allowed.
-Anything right of an underscore will be discarded.
+The plate number must be contained verbatim within the corresponding result file name.
+Any suffixes following an underscore will be dropped.
 }
 
 \section{Layout file}{
@@ -82,5 +81,12 @@ called "Description", contains the names of groups of wells.
 Since we only ever export data by well and not by group,
 this may cause problems if not all wells are scanned.
 Also we load layout and annotation separately, the column is redundant anyway.
+}
+
+\section{Dependencies}{
+
+Data files are loaded with \code{utils::read.delim}.
+Some operations are done with \code{tidyr}.
+A number of internal functions are used.
 }
 
