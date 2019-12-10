@@ -8,13 +8,13 @@ patch_annotation(x)
 }
 \arguments{
 \item{x}{\code{data.frame}
-or path to file readable by \code{data.table::fread}}
+or path to file readable by \code{\link[data.table]{fread}}}
 }
 \value{
 The annotation table with all bad rows fixed.
 }
 \description{
-Patch errors in annotation that escaped \code{\link[retry]{acutils::retry}}.
+Patch errors in annotation that escaped \code{\link[acutils]{retry}}.
 }
 \details{
 Even though \code{update_annotation} uses \code{acutils::retry}

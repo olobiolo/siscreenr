@@ -1,6 +1,6 @@
 #' fix missing gene types in annotation file
 #'
-#' Patch errors in annotation that escaped \code{\link[retry]{acutils::retry}}.
+#' Patch errors in annotation that escaped \code{\link[acutils]{retry}}.
 #'
 #' Even though \code{update_annotation} uses \code{acutils::retry}
 #' to alleviate random errors that occur when calling \code{reutils::efetch} in bulk,
@@ -16,7 +16,7 @@
 #' Will throw a warning if there are many errors to fix.
 #'
 #' @param x \code{data.frame}
-#'          or path to file readable by \code{data.table::fread}
+#'          or path to file readable by \code{\link[data.table]{fread}}
 #'
 #' @return The annotation table with all bad rows fixed.
 #'
@@ -48,7 +48,7 @@ patch_annotation <- function(x) {
   good <- tochar(good)
   redone <- tochar(redone)
   corrected <- rbind(good, redone)
-  #corrected <- dplyr::arrange(corrected, plate, position)
+
   corrected <- corrected[order(corrected$plate, corrected$position), ]
   if (any(grepl('failed to retrieve', redone$gene_type))) patch_annotation(corrected) else return(corrected)
 }
