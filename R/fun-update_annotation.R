@@ -11,7 +11,8 @@
 #' to retrieve the current gene symbol, gene description, map location,
 #' chromosome number, and aliases. This is done in batches of up to 499 items at a time.
 #'
-#' Old geneIDs are kept in a separate column, \code{old_geneid}.
+#' Original geneIDs and gene symbols are kept in separate columns,
+#' \code{original_geneid} and \code{original_gene_symbol}.
 #'
 #' @section File format:
 #' As of version 2.4 the function has undergone some generalization.
@@ -21,16 +22,16 @@
 #' plate number, well/position (e.g. A01), and geneID.
 #' All other columns are immaterial but will not be dropped.
 #'
-#' Annotation files can be updated again. In that case the columns \code{old_geneid}
-#' and \code{old_gene_symbol} will remain as is and the update will be run with old geneIDs
-#' rather than the updated ones.
+#' Annotation files can be updated again. In that case the columns
+#' \code{original_geneid} and \code{original_gene_symbol} will remain as they are
+#' and the update will be run with original geneIDs rather than the updated ones.
 #'
 #' @section Dependencies:
 #' GeneBank queries are handled with the package \code{reutils}.
 #' Data is loaded (and saved) with package \code{data.table}.
 #' Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
-#' Some errors are handled with \code{\link[retry]{acutils::retry}}.
-#' Passing arguments is done with \code{\link[retry]{acutils::get.stack}}.
+#' Some errors are handled with \code{\link[acutils]{retry}}.
+#' Passing arguments is done with \code{\link[acutils]{get.stack}}.
 #' Several internal functions are called here, see \code{Functions}.
 #'
 #' @section Processing time:
@@ -89,12 +90,14 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
   # these columns are added during the update
   # if they are all here already, it means the file was previously updated
   added_columns <- c('gene_type', 'withdrawn', 'replaced', 'gene_symbol',
-                     'description', 'map_location', 'chromosome', 'aliases', 'old_geneid')
+                     'description', 'map_location', 'chromosome', 'aliases',
+                     'original_geneid', 'original_gene_symbol')
 
   if (all(is.element(added_columns, nms))) {
     ## if the file has undergone a previous update
-    # hold on to "old geneids"
-    hold_geneid <- annotation_original$old_geneid
+    # hold on to "original geneids"
+    hold_geneid <- annotation_original$original_geneid
+    hold_gene_symbol <- annotation_original$original_gene_symbol
     # remove all added variables
     ind <- !is.element(nms, added_columns)
     annotation_original <- annotation_original[ind]
@@ -111,21 +114,20 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
       return(x)
     }
     # create vectors of regexs, replacements, and error messages
-    strings <- c('^plate[-,_,\\., ]?(no|num|number)?', '^wells?|^positions?', 'gene[-,_,\\., ]?ids?')
-    replacements <- c('plate', 'position', 'geneid')
+    strings <- c('^plate[-,_,\\., ]?(no|num|number)?', '^wells?|^positions?',
+                 'gene[-,_,\\., ]?ids?', 'gene.?symbols?')
+    replacements <- c('plate', 'position', 'geneid', 'original_gene_symbol')
     errors <- paste('"data" contains no apparent specification of',
-                    c('plate numbers', 'position', 'gene ids'))
+                    c('plate numbers', 'position', 'gene ids', 'gene symbols'))
     errors2 <- paste('"data" contains ambiguous specification of',
-                     c('plate numbers', 'position', 'gene ids'))
+                     c('plate numbers', 'position', 'gene ids', 'gene symbols'))
     # run the function across the column names
     for (i in seq_along(strings)) {
       nms <- replacer(nms, strings[i], replacements[i], errors[i], errors2[i])
     }
     # replace column names
     names(annotation_original) <- nms
-    ## required column names are now present
-    # drop gene symbol columnm if present
-    annotation_original[grepl('gene.?symbols?', names(annotation_original), ignore.case = TRUE)] <- NULL
+    ## required column names are now present and gene_symbol is renamed to original_gene_symbol
   }
 
   # change geneids to character, required for merging later
@@ -142,9 +144,9 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
     suppressMessages(double_check <- check_geneids(geneids))
   # add geneID status to annotation and amend geneIDs
   annotation_checked <- merge(annotation_original, double_check, by = 'geneid', all = TRUE)
-  annotation_checked$old_geneid <- annotation_checked$geneid
+  annotation_checked$original_geneid <- annotation_checked$geneid
   annotation_checked$geneid <- ifelse(is.na(annotation_checked$new_geneid),
-                                      annotation_checked$old_geneid,
+                                      annotation_checked$original_geneid,
                                       annotation_checked$new_geneid)
   # extract new geneIDs
   suppressWarnings({
@@ -198,7 +200,7 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
     c('plate', 'position', 'geneid',
       'gene_symbol', 'aliases', 'description', 'map_location', 'chromosome', 'gene_type',
       'sequences', 'duplex_catalog_numbers', 'pool_catalog_number',
-      'withdrawn', 'replaced', 'old_geneid')), dplyr::everything())
+      'withdrawn', 'replaced', 'original_geneid', 'original_gene_symbol')), dplyr::everything())
   if (verbose) message('\t removing duplicate rows')
   annotation_updated <- annotation_updated[!duplicated(annotation_updated), ]
   if (verbose) message('\t reordering table')

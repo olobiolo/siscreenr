@@ -51,7 +51,8 @@ Once the geneIDs are updated, yet another query is sent to GeneBank
 to retrieve the current gene symbol, gene description, map location,
 chromosome number, and aliases. This is done in batches of up to 499 items at a time.
 
-Old geneIDs are kept in a separate column, \code{old_geneid}.
+Original geneIDs and gene symbols are kept in separate columns,
+\code{original_geneid} and \code{original_gene_symbol}.
 }
 \section{Functions}{
 \itemize{
@@ -84,9 +85,9 @@ It must contain the following information:
 plate number, well/position (e.g. A01), and geneID.
 All other columns are immaterial but will not be dropped.
 
-Annotation files can be updated again. In that case the columns \code{old_geneid}
-and \code{old_gene_symbol} will remain as is and the update will be run with old geneIDs
-rather than the updated ones.
+Annotation files can be updated again. In that case the columns
+\code{original_geneid} and \code{original_gene_symbol} will remain as they are
+and the update will be run with original geneIDs rather than the updated ones.
 }
 
 \section{Dependencies}{
@@ -94,8 +95,8 @@ rather than the updated ones.
 GeneBank queries are handled with the package \code{reutils}.
 Data is loaded (and saved) with package \code{data.table}.
 Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
-Some errors are handled with \code{\link[retry]{acutils::retry}}.
-Passing arguments is done with \code{\link[retry]{acutils::get.stack}}.
+Some errors are handled with \code{\link[acutils]{retry}}.
+Passing arguments is done with \code{\link[acutils]{get.stack}}.
 Several internal functions are called here, see \code{Functions}.
 }
 
