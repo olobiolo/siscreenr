@@ -82,10 +82,19 @@
 #' Miscellaneous:
 #' \itemize{
 #'  \item{
+#'  \code{attach_annotation} add annotation to screen object
+#'  }
+#'  \item{
 #'  \code{plate.type.converter} internal function that translates plate type codes
 #'  }
 #'  \item{
-#'  \code{attach_annotation} add annotation to screen object
+#'  \code{show_conversion_key} print the key for plate type conversion by plate.type.converter
+#'  }
+#'  \item{
+#'  \code{edit_conversion_key} edit the key for plate type conversion
+#'  }
+#'  \item{
+#'  \code{recover_conversion_key} restore the original key for plate type conversion
 #'  }
 #' }
 #'
