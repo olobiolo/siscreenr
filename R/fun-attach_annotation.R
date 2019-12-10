@@ -7,7 +7,7 @@
 #' Missing gene symbols are substituted with their respective well types.
 #'
 #' @param scr a \code{data.frame} containing the screen object
-#' @param ann a \code{data.frame} containing the library annotation or path to such
+#' @param ann path to library annotation file
 #'
 #' @return a \code{data.frame}
 #'
@@ -15,14 +15,14 @@
 #'
 
 attach_annotation <- function(scr, ann) {
-  if (is.character(ann)) ann <- data.table::fread(ann)
-  if (!all(is.element(c('plate', 'position')), names(scr)))
-    stop('scr must contain "plate" and "position" columns')
-  if (!all(is.element(c('plate', 'position')), names(ann)))
-    stop('ann must contain "plate" and "position" columns')
+  if (!is.data.frame(scr)) stop('scr must be a data frame')
+  if (!all(is.element(c("plate", "position"), names(scr))))
+    stop("scr must contain \"plate\" and \"position\" columns")
+  if (!is.character(ann)) stop('ann must be a character string')
+  ann <- data.table::fread(ann)
+  if (!all(is.element(c("plate", "position"), names(ann))))
+    stop("ann must contain \"plate\" and \"position\" columns")
   if (is.factor(scr$plate)) scr$plate <- as.numeric(as.character(scr$plate))
-  if (!is.numeric(ann$plate))
-
 
   # merge items
   x <- merge(scr, ann, all.x = TRUE, all.y = FALSE)

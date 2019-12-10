@@ -9,7 +9,7 @@ attach_annotation(scr, ann)
 \arguments{
 \item{scr}{a \code{data.frame} containing the screen object}
 
-\item{ann}{a \code{data.frame} containing the library annotation or path to such}
+\item{ann}{path to library annotation file}
 }
 \value{
 a \code{data.frame}
