@@ -84,6 +84,9 @@
 #'  \item{
 #'  \code{plate.type.converter} internal function that translates plate type codes
 #'  }
+#'  \item{
+#'  \code{attach_annotation} add annotation to screen object
+#'  }
 #' }
 #'
 #' @docType package
