@@ -12,7 +12,9 @@
 #' \code{plate_type} and \code{replica} accordingly.
 #' This is done according to a dictionary file stored in the package directory.
 #'
-#' @aliases plate.type.converter, plate.type.conversion, plate_type, plate_type_conversion
+#' @aliases plate.type.converter plate.type.conversion plate.type.converter.key
+#'          plate_type plate_type_conversion
+#'          show_conversion_key edit_conversion_key recover_conversion_key
 #'
 NULL
 

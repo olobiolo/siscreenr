@@ -2,11 +2,11 @@
 % Please edit documentation in R/fun-plate.type.R
 \name{plate.type}
 \alias{plate.type}
-\alias{plate.type.converter,}
-\alias{plate.type.conversion,}
-\alias{plate_type,}
-\alias{plate_type_conversion}
 \alias{plate.type.converter}
+\alias{plate.type.conversion}
+\alias{plate.type.converter.key}
+\alias{plate_type}
+\alias{plate_type_conversion}
 \alias{show_conversion_key}
 \alias{edit_conversion_key}
 \alias{recover_conversion_key}
