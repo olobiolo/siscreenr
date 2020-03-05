@@ -6,14 +6,11 @@
 \alias{normalize.grouped_df}
 \title{normalize screen data}
 \usage{
-normalize(x, variables, method = c("median", "mean", "medpolish"),
-  reference)
+normalize(x, variables, method = c("median", "mean", "medpolish"), reference)
 
-\method{normalize}{data.frame}(x, variables, method = c("median", "mean",
-  "medpolish"), reference)
+\method{normalize}{data.frame}(x, variables, method = c("median", "mean", "medpolish"), reference)
 
-\method{normalize}{grouped_df}(x, variables, method = c("median", "mean",
-  "medpolish"), reference)
+\method{normalize}{grouped_df}(x, variables, method = c("median", "mean", "medpolish"), reference)
 }
 \arguments{
 \item{x}{screen object, i.e. a \code{data.frame}, possibly \code{grouped}}

@@ -6,14 +6,29 @@
 \alias{percentage.grouped_df}
 \title{normalized percent inhibition/activation}
 \usage{
-percentage(x, variables, positive, negative, mode = c("inhibition",
-  "activation"))
+percentage(
+  x,
+  variables,
+  positive,
+  negative,
+  mode = c("inhibition", "activation")
+)
 
-\method{percentage}{data.frame}(x, variables, positive, negative,
-  mode = c("inhibition", "activation"))
+\method{percentage}{data.frame}(
+  x,
+  variables,
+  positive,
+  negative,
+  mode = c("inhibition", "activation")
+)
 
-\method{percentage}{grouped_df}(x, variables, positive, negative,
-  mode = c("inhibition", "activation"))
+\method{percentage}{grouped_df}(
+  x,
+  variables,
+  positive,
+  negative,
+  mode = c("inhibition", "activation")
+)
 }
 \arguments{
 \item{x}{a data frame}

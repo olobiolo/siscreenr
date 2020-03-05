@@ -6,15 +6,26 @@
 \alias{color_sections}
 \title{highlight genes}
 \usage{
-highlight_genes(canvas, data, genes, x.variable, y.variable,
-  color.points = "lightyellow", color.highlight = "purple",
-  plot.title = "")
+highlight_genes(
+  canvas,
+  data,
+  genes,
+  x.variable,
+  y.variable,
+  color.points = "lightyellow",
+  color.highlight = "purple",
+  plot.title = ""
+)
 
-color_sections(x.treshold = c(-2, 2), y.treshold = c(-2, 2),
-  outer.limit = 100, categories = c("non-hit", "negative interaction",
-  "positive interaction", "doubtful viability"),
-  category.layout = matrix(c(4, 4, 4, 2, 1, 3, 2, 1, 3), nrow = 3, ncol =
-  3), colpal = c("steelblue1", "springgreen2", "indianred2", "grey85"))
+color_sections(
+  x.treshold = c(-2, 2),
+  y.treshold = c(-2, 2),
+  outer.limit = 100,
+  categories = c("non-hit", "negative interaction", "positive interaction",
+    "doubtful viability"),
+  category.layout = matrix(c(4, 4, 4, 2, 1, 3, 2, 1, 3), nrow = 3, ncol = 3),
+  colpal = c("steelblue1", "springgreen2", "indianred2", "grey85")
+)
 }
 \arguments{
 \item{canvas}{ggplot object produced by \code{color_sections}}

@@ -9,7 +9,7 @@
 #' @param scr a \code{data.frame} containing the screen object
 #' @param ann path to library annotation file
 #'
-#' @return a \code{data.frame}
+#' @return a \code{data.table}
 #'
 #' @export
 #'
@@ -19,7 +19,7 @@ attach_annotation <- function(scr, ann) {
   if (!all(is.element(c("plate", "position"), names(scr))))
     stop("scr must contain \"plate\" and \"position\" columns")
   if (!is.character(ann)) stop('ann must be a character string')
-  ann <- data.table::fread(ann)
+  ann <- data.table::fread(ann, check.names = TRUE)
   if (!all(is.element(c("plate", "position"), names(ann))))
     stop("ann must contain \"plate\" and \"position\" columns")
   if (is.factor(scr$plate)) scr$plate <- as.numeric(as.character(scr$plate))
@@ -30,7 +30,8 @@ attach_annotation <- function(scr, ann) {
   x$well_type <- as.character(x$well_type)
   x$gene_symbol <- ifelse(is.na(x$gene_symbol), x$well_type, x$gene_symbol)
   # arrange by plate, well and replica
-  x <- x[order(x$plate, x$position, x$replica), ]
+  setorderv(d, c('plate', 'position', 'replica'))
+  #x <- x[order(x$plate, x$position, x$replica), ]
 
   return(x)
 }

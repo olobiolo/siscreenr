@@ -98,6 +98,5 @@
 #'  }
 #' }
 #'
-#' @docType package
-#' @name siscreenr
-NULL
+#' @keywords internal
+"_PACKAGE"

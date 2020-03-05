@@ -4,8 +4,15 @@
 \alias{build_screen}
 \title{build screen object}
 \usage{
-build_screen(logfile, layout, datadir = "./data/", rem.col,
-  zero.to.NA = FALSE, wells = "Index", verbose = TRUE)
+build_screen(
+  logfile,
+  layout,
+  datadir = "./data/",
+  rem.col,
+  zero.to.NA = FALSE,
+  wells = "Index",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{logfile}{path to screen log file; see \code{Log file}}
@@ -87,6 +94,7 @@ Also we load layout and annotation separately, the column is redundant anyway.
 
 Data files are loaded with \code{utils::read.delim}.
 Some operations are done with \code{tidyr}.
+Dates are handled with \code{lubridate}.
 A number of internal functions are used.
 }
 

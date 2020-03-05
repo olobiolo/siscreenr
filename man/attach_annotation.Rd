@@ -12,7 +12,7 @@ attach_annotation(scr, ann)
 \item{ann}{path to library annotation file}
 }
 \value{
-a \code{data.frame}
+a \code{data.table}
 }
 \description{
 Merge library annotation with screen object.

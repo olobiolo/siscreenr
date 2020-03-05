@@ -4,8 +4,13 @@
 \alias{separate_flag}
 \title{separate plate flags into well flags}
 \usage{
-separate_flag(scr, flag = "wells_rescanned", newname, sep = ", ",
-  well.ID = "position")
+separate_flag(
+  scr,
+  flag = "wells_rescanned",
+  newname,
+  sep = ", ",
+  well.ID = "position"
+)
 }
 \arguments{
 \item{scr}{a screen object, i.e. a \code{data frame}}
