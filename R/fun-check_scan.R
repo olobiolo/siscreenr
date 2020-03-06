@@ -40,7 +40,7 @@ check_scan <- function(path, output = 'print') {
       faulty <- freqs[freqs != max(freqs)]
       # print
       cat(basename(d), '\n')
-      if (length(freqs) != 0) {
+      if (length(faulty) != 0) {
         cat('missing images in well(s):', '\t', paste(names(faulty), collapse = ', '), '\n\n')
       } else {
         cat('scan complete', '\n\n')
