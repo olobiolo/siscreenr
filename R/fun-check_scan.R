@@ -26,9 +26,11 @@ check_scan <- function(path, output = 'print') {
   # pick out directories
   dirs <- files[file_test('-d', files)]
 
-
   # do the thing
   if (output == 'print' || output == 'console') {
+    if (length(dirs) == 0) {
+      cat("no active scans", '\n')
+    }
     for (d in dirs) {
       # list image files
       images <- list.files(path = paste(d, 'data', sep = '/'), pattern = 'tif$')
@@ -47,6 +49,11 @@ check_scan <- function(path, output = 'print') {
       }
     }
   } else if (output == 'return' || output == 'list') {
+    if (length(dirs) == 0) {
+      cat("no active scans", '\n')
+      return(list())
+    }
+
     check_one <- function(path) {
       images <- list.files(path = paste(path, 'data', sep = '/'), pattern = 'tif$')
       wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
