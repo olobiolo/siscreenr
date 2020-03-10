@@ -19,6 +19,8 @@
 
 check_scan <- function(path, output = 'print') {
 
+  if (!dir.exists(path)) stop('no such directory')
+
   output <- match.arg(arg = output, choices = c('print', 'console', 'return', 'list'))
 
   # get files names with postfixes
@@ -34,8 +36,14 @@ check_scan <- function(path, output = 'print') {
     for (d in dirs) {
       # list image files
       images <- list.files(path = paste(d, 'data', sep = '/'), pattern = 'tif$')
+      # isolate well indices
+      indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
       # isolate well names
       wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
+      # order wells according to indices
+      wells <- wells[order(indices)]
+      # convert wells to factor so that they are not sorted by table
+      wells <- factor(wells, levels = unique(wells))
       # get number of ocurrences
       freqs <- table(wells)
       # get faulty wells
@@ -56,7 +64,10 @@ check_scan <- function(path, output = 'print') {
 
     check_one <- function(path) {
       images <- list.files(path = paste(path, 'data', sep = '/'), pattern = 'tif$')
+      indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
       wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
+      wells <- wells[order(indices)]
+      wells <- factor(wells, levels = unique(wells))
       freqs <- table(wells)
       faulty <- freqs[freqs != max(freqs)]
       if (length(faulty) > 0) {
