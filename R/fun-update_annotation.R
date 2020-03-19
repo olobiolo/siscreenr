@@ -323,7 +323,7 @@ get_gene_fields <- function(geneIDs) {
 
 #' @describeIn update_annotation
 #' runs \code{get_gene_fields} in batches of 499 and less; this is necessary as
-#' the results of \code{reutils::efetch} are unworkable for larger sets
+#' the results of \code{efetch} are unworkable for larger sets
 #'
 #' @keywords internal
 #'

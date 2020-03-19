@@ -7,7 +7,7 @@
 clean_column_names(x, gate = "dummy", object = "Main")
 }
 \arguments{
-\item{x}{a \code{data frame}}
+\item{x}{a \code{data.frame}}
 
 \item{gate}{gate name to be cleared, given as a regular expression;
 defaults to "dummy", which does nothing, unless there is a gate called "dummy"}
@@ -27,5 +27,5 @@ The names are cumbersome and when loaded with \code{check.names = TRUE}, they ca
 Usually most of these can be removed without any percievable loss.
 
 This is a simple stream of gsub calls that removes superfluous information from the column names.
-It also improves the formatting. \code{\link{make.names}} is run first.
+It also improves the formatting. \code{make.names} is run first.
 }

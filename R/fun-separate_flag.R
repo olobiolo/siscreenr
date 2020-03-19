@@ -20,7 +20,7 @@
 #' A well can be identified in two ways: by a number from 1 through the number of wells in a plate
 #' or by its row/column coordinates, e.g. "A3".
 #' ScanR automatically assigns the former into a column called "Index".
-#' This is renamed to "well" by \code{\link{build_screen}}.
+#' This is renamed to "well" by \code{build_screen}.
 #' ScanR also puts the latter into a column called "Description" but I recommend
 #' to disregard it as it may cause problems if the export file is defined by groups
 #' rather than wells.
@@ -33,9 +33,9 @@
 #' to whether you use a strict 3-character format or a loose one, that is whether you
 #' call an "A2" well "A2" or "A02". Keep this consistent between your files.
 #'
-#' @seealso \code{\link{insert_zeros}}
+#' @seealso \code{insert_zeros}
 #'
-#' @param scr a screen object, i.e. a \code{data frame}
+#' @param scr a screen object, i.e. a \code{data.frame}
 #' @param well.ID name of column with well identifier, given as character;
 #'               see \code{Well identifiers}
 #' @param flag name of column to transform, given as character

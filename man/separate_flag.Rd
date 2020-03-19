@@ -13,7 +13,7 @@ separate_flag(
 )
 }
 \arguments{
-\item{scr}{a screen object, i.e. a \code{data frame}}
+\item{scr}{a screen object, i.e. a \code{data.frame}}
 
 \item{flag}{name of column to transform, given as character}
 
@@ -51,7 +51,7 @@ where the noted wells will get a \code{TRUE} value and the others will get a \co
 A well can be identified in two ways: by a number from 1 through the number of wells in a plate
 or by its row/column coordinates, e.g. "A3".
 ScanR automatically assigns the former into a column called "Index".
-This is renamed to "well" by \code{\link{build_screen}}.
+This is renamed to "well" by \code{build_screen}.
 ScanR also puts the latter into a column called "Description" but I recommend
 to disregard it as it may cause problems if the export file is defined by groups
 rather than wells.
@@ -68,5 +68,5 @@ call an "A2" well "A2" or "A02". Keep this consistent between your files.
 }
 
 \seealso{
-\code{\link{insert_zeros}}
+\code{insert_zeros}
 }

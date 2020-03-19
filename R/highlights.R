@@ -128,7 +128,6 @@ color_sections <- function(x.treshold = c(-2,2), y.treshold = c(-2,2), outer.lim
                                   y.treshold[2], y.treshold[1], y.treshold[1], y.treshold[2],
                                   y.treshold[1], -outer.limit, -outer.limit, y.treshold[1]))
   # combine the two data frames and reorder categories
-  #right <- dplyr::full_join(left, coordinates)
   right <- merge(left, coordinates, all = TRUE)
   right$hit_status <- factor(right$hit_status, levels = categories)
 

@@ -100,3 +100,5 @@
 #'
 #' @keywords internal
 "_PACKAGE"
+
+.datatable.aware = TRUE

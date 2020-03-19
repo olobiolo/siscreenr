@@ -2,8 +2,8 @@
 #'
 #' Patch errors in annotation that escaped \code{\link[acutils]{retry}}.
 #'
-#' Even though \code{update_annotation} uses \code{acutils::retry}
-#' to alleviate random errors that occur when calling \code{reutils::efetch} in bulk,
+#' Even though \code{update_annotation} uses \code{\link[acutils]{retry}}
+#' to alleviate random errors that occur when calling \code{\link[reutils]{efetch}} in bulk,
 #' some queries still return errors. These will manifest as a "failed to retrieve"
 #' value in \code{gene_type}.
 #'

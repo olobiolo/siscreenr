@@ -68,7 +68,7 @@ gene symbol, gene description, map location, chromosome number, and aliases
 (other geneIDs associated with the geneID);
 
 \item \code{get_gene_fields_batch}: runs \code{get_gene_fields} in batches of 499 and less; this is necessary as
-the results of \code{reutils::efetch} are unworkable for larger sets
+the results of \code{efetch} are unworkable for larger sets
 
 \item \code{get_gene_type}: queries the gene data base and retrieves the gene type field
 
