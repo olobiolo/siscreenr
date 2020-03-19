@@ -62,31 +62,31 @@ Besides functions immediately involved in data analysis, there are some utilitie
     - the *mean* method subtracts the mean value of a measurement in a reference group from all data points
     - the *median* method works the same as the mean method but subtracts the median to remove the influence of outliers
     - the *medpolish* method runs Tukey's median polish on each plate to remove potential spatial effects; it is always applied plate-wise
-3. Conversion to zscores:
-- normalized measurements are standardized by converting them to zscores: `zi = (xi - mean(x)) / sd(x)`
-- robust zscores are also available (median and median absolute deviation replace mean and standard deviation, respectively)
-- when calculating zscores, the mean and sd estimatino can be limited to a subset of observations; this allows for choosing the group to which sample wells are compared
+3. Conversion to z-scores:
+- normalized measurements are standardized by converting them to z-scores: `zi = (xi - mean(x)) / sd(x)`
+- robust z-scores are also available (median and median absolute deviation replace mean and standard deviation, respectively)
+- when calculating z-scores, the mean and sd estimation can be limited to a subset of observations; this allows for choosing the group to which sample wells are compared
 4. Hit scoring:
 - single wells are scored as positive or negative hits (higher or lower measurement value, respectively)
-- given a zscore treshold (typically 2-3), observations are given hit scores, depending on their zscore values:
-    - wells with zscores equal or higher than {*treshold*} recieve a hit score of 1
-    - wells with zscores equal or lower than {*-treshold*} recieve a hit score of -1
-    - wells with zscores higher than {*-treshold*} and lower than {*treshold*} recieve a hit score of 0
+- given a z-score treshold (typically 2-3), observations recieve hit scores, depending on their z-score values:
+    - wells with z-scores equal or higher than {*treshold*} recieve a hit score of 1
+    - wells with z-scores equal or lower than {*-treshold*} recieve a hit score of -1
+    - wells with z-scores higher than {*-treshold*} and lower than {*treshold*} recieve a hit score of 0
 - hit scores are summarized over replicates
 - wells that meet the stringency criterion are considered hits
-- the stringency criterion can be the number or the fraction of replicates that pass the zscore treshold
+- the stringency criterion can be the number or the fraction of replicates that pass the z-score treshold
 
-*Example: In a screen with three replicates the zscore treshold is 2.4 and the stringency criterion is 2.*
+*Example: In a screen with three replicates the z-score treshold is 2.4 and the stringency criterion is 2.*
 
-- *A well with zscores of 2.2, 2.6 and 2.57 has hit scores of 0, 1 and 1, yielding a summarized hit score of 2: a hit.*
-- *A well will zscores of -2.4, 2.8 and 3.1. has hit scores of -1, 1 and 1, which yields a summarized hit score of 1: no hit.*
-- *Finally, a well with zscores of 2.23, 2.1 and 2.5 has hit scores of 0, 0 and 1: also not a hit.*
+- *A well with z-scores of 2.2, 2.6 and 2.57 has hit scores of 0, 1 and 1, yielding a summarized hit score of 2: a hit.*
+- *A well will z-scores of -2.4, 2.8 and 3.1. has hit scores of -1, 1 and 1, which yields a summarized hit score of 1: no hit.*
+- *Finally, a well with z-scores of 2.23, 2.1 and 2.5 has hit scores of 0, 0 and 1: also not a hit.*
 
 5. Once hits are determined, well annotation is attached.
 6. Some tools for data visualization are available:
 - scatter plot of zscore vs cell viability
 - hit distribution plots: number of hits per row, per column, and per plate (for quality control)
-7. A report file can be generated at will, this is left to the user's discretion.
+7. A report file can be generated at will, this is left to the User's discretion.
 
 #### An alternative workflow:
 
@@ -97,4 +97,4 @@ Besides functions immediately involved in data analysis, there are some utilitie
 3. Hit scoring is done by setting a treshold on the NPI/NPA and applyin the stringency criterion.
 4. Data annotation proceeds normally.
 5. A plotting tool for NPI is available. The hit distribution tool as applicable.
-6. Reporting is left to the user, as usual.
+6. Reporting is left to the User, as usual.
