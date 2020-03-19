@@ -26,7 +26,7 @@ check_scan <- function(path, output = 'print') {
   # get files names with postfixes
   files <- list.files(path = path, pattern = '_[0-9]{3}$', full.names = TRUE, recursive = FALSE)
   # pick out directories
-  dirs <- files[file_test('-d', files)]
+  dirs <- files[utils::file_test('-d', files)]
 
   # do the thing
   if (output == 'print' || output == 'console') {

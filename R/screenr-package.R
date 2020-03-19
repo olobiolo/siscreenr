@@ -101,4 +101,11 @@
 #' @keywords internal
 "_PACKAGE"
 
-.datatable.aware = TRUE
+# TODO
+# 1. shiny app for interactive results exploration
+#   scatter plot with tooltips, zoom, more...
+# 2. completely remove acutils dependencies
+#   retry and get.stack in update_annotation
+#   retry in patch_annotation
+#   difficult as they are code-related, so exotic
+#   make them internal, perhaps?

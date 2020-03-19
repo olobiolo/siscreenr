@@ -61,7 +61,7 @@ plate.type.converter <- function(x) {
 
 show_conversion_key <- function() {
   thefile <- system.file('extdata/plate.type.converter.key.txt', package = 'siscreenr')
-  read.delim(thefile, stringsAsFactors = FALSE)
+  utils::read.delim(thefile, stringsAsFactors = FALSE)
 }
 
 #' @param key a data frame with all character columns
@@ -87,7 +87,7 @@ edit_conversion_key <- function(key) {
   thefile <- system.file('extdata/plate.type.converter.key.txt', package = 'siscreenr')
   theoldfile <- sub('converter.key.txt', 'converter.key.original.txt', thefile, fixed = TRUE)
   file.copy(thefile, theoldfile)
-  write.table(key, thefile, sep = '\t', row.names = FALSE, quote = FALSE)
+  utils::write.table(key, thefile, sep = '\t', row.names = FALSE, quote = FALSE)
 }
 
 #' @export
