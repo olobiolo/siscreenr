@@ -1,6 +1,6 @@
 Package: siscreenr
 Title: Analyze Genome-Wide siRNA Screening Campaigns
-Version: 2.11.7
+Version: 2.12.0
 Authors@R: 
     person(given = "Aleksander",
            family = "Chlebowski",
@@ -27,8 +27,9 @@ Imports:
     metamethods (>= 0.1.4)
 Suggests: 
     testthat
-Remotes: 
-    olobiolo/metamethods
+Remotes:  
+    olobiolo/metamethods,
+    olobiolo/acutils
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2

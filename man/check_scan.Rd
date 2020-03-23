@@ -2,9 +2,12 @@
 % Please edit documentation in R/fun-check_scan.R
 \name{check_scan}
 \alias{check_scan}
+\alias{scan_status}
 \title{check scan completion}
 \usage{
 check_scan(path, output = "print")
+
+scan_status(path, output = "print")
 }
 \arguments{
 \item{path}{path to directory where scans are stored}
@@ -14,13 +17,37 @@ print/console for printing to the console,
 return/list for returning a named list;
 determined by partial match}
 }
+\value{
+In concole/print mode - nothing. In list/return mode, a named list.
+Inromation on scan completion by \code{scan_status} only appears in console mode.
+}
 \description{
-Tally image files after a scan andreport missing images.
+Report wells with missing images or logged events (e.g. erros).
 }
 \details{
 The function firt lists all directories in a given location
 and identifies recent scans by their numeric postfixes.
 Thereafter, it lists all .tif files in the appropriate data directories
-and prints the well names, for which the number of collected images
+and checks the well names, for which the number of collected images
 is different to the maximum of all wells.
+\code{scan_status} also checks which wells (if any) had any events logged
+in the ScanR acquisition log and (in console mode) informs whether the scan
+is complete or still ongoing.
+
+\code{scan_status} is the new, superior version. \code{check_scan} will be deprecated in time.
 }
+\section{Functions}{
+\itemize{
+\item \code{scan_status}: upgrade:
+
+1. Also reports wells in which ScanR has logged events.
+
+2. In \code{console} mode prints scan completion.
+}}
+
+\section{Warning}{
+
+\code{scan_status} is a work in progress. Some errors may escape notice.
+Due to ScanR log formats the reported events may be assigned to a neighboring well.
+}
+
