@@ -14,6 +14,7 @@
 #' @author Aleksander Chlebowski
 #'
 #' @section Functions:
+#'
 #' Data analysis:
 #' \itemize{
 #'   \item{
@@ -52,6 +53,9 @@
 #'
 #' File preparation:
 #' \itemize{
+#'  \item{
+#'  \code{fetch_files} copy all result files from a screen directory to one location
+#'  }
 #'  \item{
 #'  \code{layouts} prepare layout file from components
 #'  }
@@ -96,6 +100,9 @@
 #'  \item{
 #'  \code{recover_conversion_key} restore the original key for plate type conversion
 #'  }
+#'  \item{
+#'  \code{scan_status} report on the status of the latest and any acquisition errors
+#'  }
 #' }
 #'
 #' @keywords internal
@@ -105,7 +112,10 @@
 # 1. shiny app for interactive results exploration
 #   scatter plot with tooltips, zoom, more...
 # 2. completely remove acutils dependencies
-#   retry and get.stack in update_annotation
+#         get.stack in update_annotation  DONE, now test    FUCK this is hard...
+#   retry in update_annotation
 #   retry in patch_annotation
 #   difficult as they are code-related, so exotic
 #   make them internal, perhaps?
+# 3. shiny app for scan error exploration to facilitate remote rescanning?
+#    idk, the text version seems to be ding well right now...

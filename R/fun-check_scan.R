@@ -109,6 +109,15 @@ check_scan <- function(path, output = 'print') {
 
 scan_status <- function(path, output = 'print') {
 
+
+  # messages:
+  message.noscans <- 'no active scans'
+  message.scanactive <- 'scan is running'
+  message.scanfinished <- 'scan has finished' # scan complete
+  message.noissues <- 'scan complete' # scan complete
+  message.issues <- 'issues in well(s)' # missing images in well(s)
+
+
   if (!dir.exists(path)) stop('no such directory')
 
   output <- match.arg(arg = output, choices = c('print', 'console', 'return', 'list'))
@@ -142,7 +151,7 @@ scan_status <- function(path, output = 'print') {
   # do the thing
   if (output == 'print' || output == 'console') {
     if (length(dirs) == 0) {
-      cat("no active scans", '\n')
+      cat(message.noscans, '\n')
     }
     for (d in dirs) {
       # check aquisition log to see if scan has finished
@@ -150,9 +159,9 @@ scan_status <- function(path, output = 'print') {
       # print scan name and status
       cat(basename(d), ':', '\t', sep = '')
       if (aclog[nrow(aclog), 1] == 'ENDACQUISITION'){
-        cat('scan complete', '\n')
+        cat(message.scanfinished, '\n')
       } else {
-        cat('scan running', '\n')
+        cat(message.scanactive, '\n')
       }
       # list image files
       images <- list.files(path = paste(d, 'data', sep = '/'), pattern = 'tif$')
@@ -174,14 +183,14 @@ scan_status <- function(path, output = 'print') {
       badwells <- unique(c(names(faulty), eventful))
       # print scan completeness
       if (length(badwells) != 0) {
-        cat('missing images in well(s):', '\t', paste(badwells, collapse = ', '), '\n\n')
+        cat(message.issues, ': ', '\t', paste(badwells, collapse = ', '), '\n\n', sep ='')
       } else {
-        cat('scan complete', '\n\n')
+        cat(message.noissues, '\n\n')
       }
     }
   } else if (output == 'return' || output == 'list') {
     if (length(dirs) == 0) {
-      cat("no active scans", '\n')
+      cat(message.noscans, '\n')
       return(list())
     }
 
@@ -199,7 +208,7 @@ scan_status <- function(path, output = 'print') {
       if (length(badwells) > 0) {
         return(paste(badwells, collapse = ', '))
       } else {
-        return("scan complete")
+        return(message.noissues)
       }
     }
 

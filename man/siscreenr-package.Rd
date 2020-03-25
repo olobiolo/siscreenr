@@ -18,6 +18,7 @@ However, it is compatible with other plate formats and some concepts can be tran
 }
 \section{Functions}{
 
+
 Data analysis:
 \itemize{
   \item{
@@ -50,6 +51,9 @@ Data formatting:
 
 File preparation:
 \itemize{
+ \item{
+ \code{fetch_files} copy all result files from a screen directory to one location
+ }
  \item{
  \code{layouts} prepare layout file from components
  }
@@ -93,6 +97,9 @@ Miscellaneous:
  }
  \item{
  \code{recover_conversion_key} restore the original key for plate type conversion
+ }
+ \item{
+ \code{scan_status} report on the status of the latest and any acquisition errors
  }
 }
 }
