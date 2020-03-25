@@ -1,6 +1,6 @@
 Package: siscreenr
 Title: Analyze Genome-Wide siRNA Screening Campaigns
-Version: 2.12.0
+Version: 2.12.1
 Authors@R: 
     person(given = "Aleksander",
            family = "Chlebowski",
@@ -27,7 +27,7 @@ Imports:
     metamethods (>= 0.1.4)
 Suggests: 
     testthat
-Remotes:  
+Remotes: 
     olobiolo/metamethods,
     olobiolo/acutils
 Encoding: UTF-8

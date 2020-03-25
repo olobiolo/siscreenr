@@ -66,7 +66,7 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
     }
   }
   # check if outfile can be created (only in different to infile)
-  if (!missing(outfile) & !missing(outfile)) {
+  if (!missing(infile) & !missing(outfile)) {
     if (infile != outfile) {
       tryCatch(file.create(outfile),
                message = function(m) stop('there is a problem with creating "outfile"', call. = FALSE),
