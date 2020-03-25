@@ -37,12 +37,12 @@ Input files \strong{must} follow these rules:
 2. must have a "well" column with integer well numbers
 
 3. must have the plate type encoded either as a "plate_type" column
-\strong{or} in the file name: as the last element before the extension, e.g. "layout_S14_test.txt
+\strong{or} in the file name as the last element before the extension, e.g. "layout_S14_test.txt"
 
 4. if there is a single layout, it must be in a column called "well_type"
 
 5. if there is more than one layout, each must be placed in a separate column,
-the name of which must by the plating date in yyyymmdd format (legal separators are allowed)
+the name of which must be the plating date in yyyymmdd format (legal separators are allowed)
 
-There should also have a "position" column or "row" and "column" columns but this is optional.
+There should also be a "position" column or "row" and "column" columns but this is optional.
 }
