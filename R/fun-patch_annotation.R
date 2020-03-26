@@ -50,5 +50,10 @@ patch_annotation <- function(x) {
   corrected <- rbind(good, redone)
 
   corrected <- corrected[order(corrected$plate, corrected$position), ]
-  if (any(grepl('failed to retrieve', redone$gene_type))) patch_annotation(corrected) else return(corrected)
+  if (any(grepl('failed to retrieve', redone$gene_type))) {
+    patch_annotation(corrected)
+    }
+  else {
+    return(corrected)
+  }
 }

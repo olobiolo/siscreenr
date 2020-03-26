@@ -20,6 +20,15 @@ You may need to install the `devtools` package beforehand:
 
 <br>
 
+## Dependencies:
+
+- Reading and writing large files is done with package `data.table`.
+- Data processing is done mostly in base R with minimal use of packages `dplyr` and `tidyr`.
+- Dates are handled with package `lubridate`.
+- Plotting is done with packages `ggplot2` and `lattice`.
+- GeneBank data base is queried with packare `reutils`.
+- Finally, some S3 methods are created with package `metamethods`.
+
 ## Literature and Inspirations
 
 - Hadley Wickham's Advanced R (https://adv-r.hadley.nz/).

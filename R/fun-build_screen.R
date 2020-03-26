@@ -132,9 +132,8 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
   names(scr)[which(names(scr) == wells)] <- 'well'
   scr <- tidyr::separate(scr, 'filename', c('plateno','extension'), sep = '_')
   scr <- merge(screenlog, scr, by = 'plateno', all.x = FALSE, all.y = TRUE)
-  scr <- scr %>%
-    tidyr::separate('plateno', c('plate', 'prepared', 'screen', 'replica'), sep = '\\.') %>%
-    tidyr::separate('replica', c('plate_type', 'number'), sep = 1)
+  scr <- tidyr::separate(scr, 'plateno', c('plate', 'prepared', 'screen', 'replica'), sep = '\\.')
+  scr <- tidyr::separate(scr, 'replica', c('plate_type', 'number'), sep = 1)
   scr$plate <- as.numeric(gsub('[A-Z]', '', scr$plate))
   scr <- plate.type.converter(scr)
   scr <- tidyr::unite(scr, 'replica', 'replica', 'number', sep = '')

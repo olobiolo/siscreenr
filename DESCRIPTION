@@ -1,6 +1,6 @@
 Package: siscreenr
 Title: Analyze Genome-Wide siRNA Screening Campaigns
-Version: 2.14.0
+Version: 2.15.0
 Authors@R: 
     person(given = "Aleksander",
            family = "Chlebowski",
@@ -16,7 +16,6 @@ URL: http://github.com/olobiolo/siscreenr
 Depends: 
     R (>= 3.5.0)
 Imports: 
-    magrittr (>= 1.5),
     dplyr (>= 0.7.8),
     tidyr (>= 0.8.2),
     ggplot2 (>= 3.1.0),
@@ -27,7 +26,7 @@ Imports:
 Suggests: 
     testthat
 Remotes: 
-    olobiolo/metamethods,
+    olobiolo/metamethods
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2

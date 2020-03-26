@@ -71,8 +71,8 @@ plot_screen_progress <- function(directory, file) {
   SS <- data.table::melt(SS, 1, 2:3)
   names(SS) <- c('day', 'plates', 'number_of_plates')
   #
-  P <- SS %>%
-    ggplot2::ggplot(ggplot2::aes_string(x = 'day', y = 'number_of_plates', fill = 'plates')) +
+  P <-
+    ggplot2::ggplot(SS, ggplot2::aes_string(x = 'day', y = 'number_of_plates', fill = 'plates')) +
     ggplot2::geom_bar(stat = 'identity', position = ggplot2::position_identity(), width = 1) +
     ggplot2::scale_fill_manual(values = c('limegreen', 'cornflowerblue')) +
     ggplot2::ggtitle('material accumulation over the course of the screen') +
