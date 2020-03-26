@@ -47,7 +47,6 @@ zscore <- function(x, ...) {
 #' @describeIn zscore for numeric vectors
 zscore.default <- function(x, robust = TRUE, deviations = FALSE, reference, ...) {
   if (!is.numeric(x)) stop('"x" must be numeric')
-
   ref <-
     if (missing(reference)) {
       x
@@ -66,7 +65,7 @@ zscore.default <- function(x, robust = TRUE, deviations = FALSE, reference, ...)
     if (robust) {
       stats::mad(ref, na.rm = TRUE)
     } else {
-      mean(ref, na.rm = TRUE)
+      sd(ref, na.rm = TRUE)
     }
 
   zsc <- (x - loc) / disp
@@ -78,7 +77,6 @@ zscore.default <- function(x, robust = TRUE, deviations = FALSE, reference, ...)
 zscore.data.frame <- function(x, robust = TRUE, deviations = FALSE, reference, variables, ...) {
 
   # check arguments
-  if (!is.data.frame(x)) stop('x must be a data frame')
   if (missing(variables)) {
     message('no variables selected; taking all numeric variables except "well" and "column"')
     variables <- setdiff(names(Filter(is.numeric, x)), c('well', 'column'))

@@ -21,7 +21,7 @@ test_that('zeros inserted into character', {
 })
 
 test_that('other methods work', {
-  expect_identical(insert_zeros(char), insert_zeros(fact))
+  expect_equal(insert_zeros(char), insert_zeros(fact))
   expect_identical(insert_zeros(char), insert_zeros(intg))
   expect_identical(insert_zeros(intg), insert_zeros(doub))
 })
