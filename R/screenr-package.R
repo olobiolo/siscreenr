@@ -103,6 +103,9 @@
 #'  \item{
 #'  \code{scan_status} report on the status of the latest and any acquisition errors
 #'  }
+#'  \item{
+#'  \code{retry} rerun call that randomly fails; taken from \code{link[acutils]{acutils}}
+#'  }
 #' }
 #'
 #' @keywords internal

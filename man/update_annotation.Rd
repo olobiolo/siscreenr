@@ -2,23 +2,23 @@
 % Please edit documentation in R/fun-update_annotation.R
 \name{update_annotation}
 \alias{update_annotation}
-\alias{check_geneid_status}
 \alias{check_geneids}
+\alias{check_geneid_status}
 \alias{get_gene_fields}
 \alias{get_gene_fields_batch}
 \alias{get_gene_type}
 \alias{extract_field}
 \title{update library annotation}
 \usage{
-update_annotation(infile, outfile, verbose = FALSE)
+update_annotation(infile, outfile, verbose = FALSE, ...)
 
-check_geneid_status(geneID)
+check_geneids(geneIDs, verbose, ...)
 
-check_geneids(geneIDs)
+check_geneid_status(geneID, verbose, ...)
 
 get_gene_fields(geneIDs)
 
-get_gene_fields_batch(geneIDs)
+get_gene_fields_batch(geneIDs, verbose, ...)
 
 get_gene_type(geneID)
 
@@ -32,7 +32,9 @@ deafults to internally sotred Dharmacon annotation from 16th May 2015
 
 \item{outfile}{(optional) path to a file to save the updated annotation}
 
-\item{verbose}{logical whether or not to report function progres}
+\item{verbose}{logical whether or not to report progres,}
+
+\item{...}{ellipsis to facilitate control of internal functions' verbosity}
 }
 \value{
 The function either invisibly returns a data frame
@@ -50,18 +52,20 @@ It then queries Genebank again to retrieve the gene type (protein-coding, pseudo
 Once the geneIDs are updated, yet another query is sent to GeneBank
 to retrieve the current gene symbol, gene description, map location,
 chromosome number, and aliases. This is done in batches of up to 499 items at a time.
+(This seems like an odd limit but \code{reutils} forces
+saving results to a file at 500 or more records per query.)
 
 Original geneIDs and gene symbols are kept in separate columns,
 \code{original_geneid} and \code{original_gene_symbol}.
 }
 \section{Functions}{
 \itemize{
+\item \code{check_geneids}: runs \code{check_geneid_status} for all geneIDs and returns a \code{data.frame};
+pauses for 0.5 second before each request to avoid swamping the server
+
 \item \code{check_geneid_status}: checks a single geneID and retrieves its withdrawn and replaced status (TRUE/FALSE)
 and a potential new geneID; then retrieves the gene type (protein-coding, pseudo, etc.);
 there is a 1 second pause between queries; returns a character vector
-
-\item \code{check_geneids}: runs \code{check_geneid_status} for all geneIDs and returns a \code{data.frame};
-pauses for 0.5 second before each request to avoid swamping the server
 
 \item \code{get_gene_fields}: queries the gene data base and retrieves five fields:
 gene symbol, gene description, map location, chromosome number, and aliases
@@ -85,7 +89,7 @@ It must contain the following information:
 plate number, well/position (e.g. A01), and geneID.
 All other columns are immaterial but will not be dropped.
 
-Annotation files can be updated again. In that case the columns
+Annotation files can be re-updated. In such a case the columns
 \code{original_geneid} and \code{original_gene_symbol} will remain as they are
 and the update will be run with original geneIDs rather than the updated ones.
 }
@@ -93,18 +97,20 @@ and the update will be run with original geneIDs rather than the updated ones.
 \section{Dependencies}{
 
 GeneBank queries are handled with the package \code{reutils}.
+Random errors that occur on queries are handled with \code{retry}.
 Data is loaded (and saved) with package \code{data.table}.
-Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
-Some errors are handled with \code{\link[acutils]{retry}}.
-Passing arguments is done with \code{\link[acutils]{get.stack}}.
+Data processing is mostly done in base R, with (minimal) use of \code{dplyr} and \code{tidyr}.
 Several internal functions are called here, see \code{Functions}.
 }
 
 \section{Processing time}{
 
 \code{check_geneid_status}
-queries GeneBank one geneID at a time, which may swamp the server.
-Hence, a 0.5 second pause is introduced before every query.
+queries GeneBank one geneID at a time, which may swamp the server,
+hence a 0.5 second pause is introduced before every query.
 }
 
+\seealso{
+\code{\link[reutils]{reutils}}, \code{\link[siscreenr]{retry}}, \code{\link[base]{dots}}
+}
 \keyword{internal}

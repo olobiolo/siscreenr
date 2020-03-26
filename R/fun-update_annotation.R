@@ -10,6 +10,8 @@
 #' Once the geneIDs are updated, yet another query is sent to GeneBank
 #' to retrieve the current gene symbol, gene description, map location,
 #' chromosome number, and aliases. This is done in batches of up to 499 items at a time.
+#' (This seems like an odd limit but \code{reutils} forces
+#' saving results to a file at 500 or more records per query.)
 #'
 #' Original geneIDs and gene symbols are kept in separate columns,
 #' \code{original_geneid} and \code{original_gene_symbol}.
@@ -22,37 +24,40 @@
 #' plate number, well/position (e.g. A01), and geneID.
 #' All other columns are immaterial but will not be dropped.
 #'
-#' Annotation files can be updated again. In that case the columns
+#' Annotation files can be re-updated. In such a case the columns
 #' \code{original_geneid} and \code{original_gene_symbol} will remain as they are
 #' and the update will be run with original geneIDs rather than the updated ones.
 #'
 #' @section Dependencies:
 #' GeneBank queries are handled with the package \code{reutils}.
+#' Random errors that occur on queries are handled with \code{retry}.
 #' Data is loaded (and saved) with package \code{data.table}.
-#' Data processing is done with (minimal) use of \code{dplyr} and \code{tidyr}.
-#' Some errors are handled with \code{\link[acutils]{retry}}.
-#' Passing arguments is done with \code{\link[acutils]{get.stack}}.
+#' Data processing is mostly done in base R, with (minimal) use of \code{dplyr} and \code{tidyr}.
 #' Several internal functions are called here, see \code{Functions}.
 #'
 #' @section Processing time:
 #' \code{check_geneid_status}
-#' queries GeneBank one geneID at a time, which may swamp the server.
-#' Hence, a 0.5 second pause is introduced before every query.
+#' queries GeneBank one geneID at a time, which may swamp the server,
+#' hence a 0.5 second pause is introduced before every query.
 #'
 #' @param infile file containing the original annotation;
 #'               must be compatible with \code{\link[data.table]{fread}};
 #'               deafults to internally sotred Dharmacon annotation from 16th May 2015
 #'               (plate numbers have been unified, originally each subset was numbered independently)
 #' @param outfile (optional) path to a file to save the updated annotation
-#' @param verbose logical whether or not to report function progres
+#' @param verbose logical whether or not to report progres,
+#' @param ... ellipsis to facilitate control of internal functions' verbosity
 #'
 #' @return The function either invisibly returns a data frame
 #'         or saves to a specified path and returns nothing.
 #'
 #' @export
 #'
+#' @seealso
+#' \code{\link[reutils]{reutils}}, \code{\link[siscreenr]{retry}}, \code{\link[base]{dots}}
+#'
 
-update_annotation <- function(infile, outfile, verbose = FALSE) {
+update_annotation <- function(infile, outfile, verbose = FALSE, ...) {
   # check if infile exists
   if (!missing(infile) && !file.exists(infile)) stop('"infile" not found')
   # check if infile is different from outfile
@@ -140,8 +145,8 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
 
   # check geneID status
   if (verbose) message('checking geneID status')
-  if (verbose) double_check <- check_geneids(geneids) else
-    suppressMessages(double_check <- check_geneids(geneids))
+  if (verbose) double_check <- check_geneids(geneids, verbose, ...) else
+    suppressMessages(double_check <- check_geneids(geneids, verbose, ...))
   # add geneID status to annotation and amend geneIDs
   annotation_checked <- merge(annotation_original, double_check, by = 'geneid', all = TRUE)
   annotation_checked$original_geneid <- annotation_checked$geneid
@@ -155,7 +160,7 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
   })
   # get gene fields for all new geneIDs
   if (verbose) message('getting locus info...')
-  fields <- get_gene_fields_batch(geneids)
+  fields <- get_gene_fields_batch(geneids, verbose, ...)
   # append fields to amended annotation
   if (verbose) message('appending to annotation...')
   annotations_merged <- merge(annotation_checked, fields, by = 'geneid', all = TRUE)
@@ -233,6 +238,38 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
 }
 
 #' @describeIn update_annotation
+#' runs \code{check_geneid_status} for all geneIDs and returns a \code{data.frame};
+#' pauses for 0.5 second before each request to avoid swamping the server
+#'
+#' @keywords internal
+#'
+check_geneids <- function(geneIDs, verbose, ...) {
+  # define function that counts iterations
+  how_to_count <- function() {
+    X <- length(geneIDs)
+    iteration <- 1
+    function(verbose, ...) {
+      if (verbose) message('\t geneID ', iteration, ' of ', X, '...')
+      iteration <<- iteration + 1
+    }
+  }
+  count <- how_to_count()
+  # define counting function operator for checking geneid status
+  check_geneid_status_with_pause <- function(x, verbose, ...) {
+    count(verbose, ...)
+    Sys.sleep(0.5)
+    check_geneid_status(x, verbose, ...)
+  }
+  m <- vapply(geneIDs, function(x) check_geneid_status_with_pause(x, verbose, ...), character(4))
+  d <- as.data.frame(t(m), stringsAsFactors = FALSE)
+  d$withdrawn <- as.logical(d$withdrawn)
+  d <- tidyr::separate(d, 'replaced', c('replaced', 'new_geneid'), sep = 'ID: ')
+  d$replaced <- ifelse(is.na(d$replaced), FALSE, TRUE)
+  d$new_geneid <- as.numeric(d$new_geneid)
+  return(d)
+}
+
+#' @describeIn update_annotation
 #' checks a single geneID and retrieves its withdrawn and replaced status (TRUE/FALSE)
 #' and a potential new geneID; then retrieves the gene type (protein-coding, pseudo, etc.);
 #' there is a 1 second pause between queries; returns a character vector
@@ -240,7 +277,7 @@ update_annotation <- function(infile, outfile, verbose = FALSE) {
 #' @keywords internal
 #'
 
-check_geneid_status <- function(geneID) {
+check_geneid_status <- function(geneID, verbose, ...) {
   if (length(geneID) != 1L) stop('"geneID" must be of length 1')
   efetch_object <- reutils::efetch(geneID, db = 'gene', rettype = 'gene_table')
   efetch_text <- reutils::content(efetch_object, as = 'text')
@@ -252,45 +289,11 @@ check_geneid_status <- function(geneID) {
   # a pause here prevents some delays I do not understand
   Sys.sleep(1)
   # get gene type
-  V <- acutils::get.stack('verbose')
-  if (V) message('\t getting gene type')
-  gene_type <- acutils::retry(get_gene_type(geneID), 5, 'failed to retrieve', verbose = V)
+  if (verbose) message('\t getting gene type')
+  gene_type <- retry(get_gene_type(geneID), 5, 'failed to retrieve', verbose, ...)
   result <- c(geneid = as.character(geneID), withdrawn = withdrawn, replaced = replaced,
               gene_type = gene_type)
   if (length(result) == 4) return(result) else browser()
-}
-
-#' @describeIn update_annotation
-#' runs \code{check_geneid_status} for all geneIDs and returns a \code{data.frame};
-#' pauses for 0.5 second before each request to avoid swamping the server
-#'
-#' @keywords internal
-#'
-check_geneids <- function(geneIDs) {
-  V <- acutils::get.stack('verbose')
-  # define function that counts iterations
-  how_to_count <- function() {
-    X <- length(geneIDs)
-    iteration <- 1
-    function() {
-      if (V) message('\t geneID ', iteration, ' of ', X, '...')
-      iteration <<- iteration + 1
-    }
-  }
-  count <- how_to_count()
-  # define checkingcounting function operator for checking geneid status
-  check_geneid_status_with_pause <- function(x) {
-    count()
-    Sys.sleep(0.5)
-    check_geneid_status(x)
-  }
-  m <- vapply(geneIDs, check_geneid_status_with_pause, character(4))
-  d <- as.data.frame(t(m), stringsAsFactors = FALSE)
-  d$withdrawn <- as.logical(d$withdrawn)
-  d <- tidyr::separate(d, 'replaced', c('replaced', 'new_geneid'), sep = 'ID: ')
-  d$replaced <- ifelse(is.na(d$replaced), FALSE, TRUE)
-  d$new_geneid <- as.numeric(d$new_geneid)
-  return(d)
 }
 
 #' @describeIn update_annotation
@@ -327,26 +330,24 @@ get_gene_fields <- function(geneIDs) {
 #'
 #' @keywords internal
 #'
-get_gene_fields_batch <- function(geneIDs) {
-  # verbosity check
-  V <- acutils::get.stack('verbose')
+get_gene_fields_batch <- function(geneIDs, verbose, ...) {
   # we shall be calling efetch, which can only be done for less than 500 geneIDs at a time
   # test how many items there are
   howmany <- length(geneIDs)
   # if there area less that 500 items, a single call suffices
   if (howmany < 500) {
-    if (V) message('\t ... in one batch') # scoping not working...
+    if (verbose) message('\t ... in one batch') # scoping not working...
     return(get_gene_fields(geneIDs))
   } else {
     # if there are 500 or more, we shall do it in 499-item steps
     # how many steps will there be?
     steps <- ceiling(howmany / 499)
-    if (V) message('\t ... in ', steps, ' batches') # scoping not working...
+    if (verbose) message('\t ... in ', steps, ' batches') # scoping not working...
     # create funcion factory that will select a 499-long intervals from a long vector
     stepper <- function(step) {
       # return function that returns the i-th 499-element section of x
-      function(x) {
-        if (V) message('\t\t batch ', step)
+      function(x, verbose, ...) {
+        if (verbose) message('\t\t batch ', step)
         X <- x[1:499 + 499 * (step -1)]
         X[!is.na(X)]
       }
@@ -355,7 +356,7 @@ get_gene_fields_batch <- function(geneIDs) {
     # generate a list of functions that each returns a section of a vector
     steppers <- lapply(1:steps, stepper)
     # separate geneIDs into list of intervals
-    ranges <- lapply(steppers, function(f) f(geneIDs))
+    ranges <- lapply(steppers, function(f) f(geneIDs, verbose, ...))
     # do the deed over the list
     parts <- lapply(ranges, get_gene_fields)
     # wrap into single data frame
