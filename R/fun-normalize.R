@@ -36,9 +36,7 @@
 #' For other methods a reference subset can be specified. Any logical predicate will do.
 #' If no reference is declared, normalization will be done against the whole population.
 #'
-#' @section Grouped data frames (\code{dplyr} package):
-#' The method for class \code{grouped_df} is home brewed as I don't know
-#' how to properly handle this class.
+#' @inheritSection zscore Grouped data frames (\code{dplyr} package)
 #'
 #' @export
 #'
