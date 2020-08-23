@@ -74,3 +74,9 @@ supply a logical vector (or predicate that will be evaluated
 within the data frame) to determine the reference subpopulation.
 }
 
+\section{Grouped data frames (\code{dplyr} package)}{
+
+The method for class \code{grouped_df} is home brewed as I don't know
+how to properly handle this class.
+}
+
