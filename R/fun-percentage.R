@@ -13,9 +13,11 @@
 #'
 #' This is a method of data normalization in a high throughput screening campaign.
 #'
-#' @section Grouped data frames (\code{dplyr} package):
-#' Since I don't know how to properly program for class \code{grouped_df},
-#' its method is involves a workaround.
+#' @inheritSection normalize Grouped data frames (\code{dplyr} package)
+#'
+# #' @section Grouped data frames (\code{dplyr} package):
+# #' Since I don't know how to properly program for class \code{grouped_df},
+# #' its method is involves a workaround.
 #'
 #' @section Grouping variables:
 #' Grouped data frames (class \code{grouped_df}) may cause problems

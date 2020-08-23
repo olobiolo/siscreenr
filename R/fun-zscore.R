@@ -65,7 +65,7 @@ zscore.default <- function(x, robust = TRUE, deviations = FALSE, reference, ...)
     if (robust) {
       stats::mad(ref, na.rm = TRUE)
     } else {
-      sd(ref, na.rm = TRUE)
+      stats::sd(ref, na.rm = TRUE)
     }
 
   zsc <- (x - loc) / disp

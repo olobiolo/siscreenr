@@ -71,17 +71,17 @@ then \code{cbind}s the result to \code{x}
 \item \code{grouped_df}: see \code{\link[metamethods]{data.frame__to__grouped_df}}
 }}
 
-\section{Grouped data frames (\code{dplyr} package)}{
-
-Since I don't know how to properly program for class \code{grouped_df},
-its method is involves a workaround.
-}
-
 \section{Grouping variables}{
 
 Grouped data frames (class \code{grouped_df}) may cause problems
 if grouping variables are used to define positive and negative controls.
 It is best to create a separate variable to base the
 \code{positive} and \code{negative} predicates on.
+}
+
+\section{Grouped data frames (\code{dplyr} package)}{
+
+The method for class \code{grouped_df} is home brewed as I don't know
+how to properly handle this class.
 }
 

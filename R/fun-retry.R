@@ -40,7 +40,7 @@
 #'
 #' @seealso \code{\link[base]{dots}}
 
-retry <- function(call, max.iter, fail = NA, verbose = FALSE) {
+retry <- function(call, max.iter, fail = NA, verbose = FALSE, ...) {
   C <- substitute(call)
   if (!is.call(C)) stop('"call" must be a function call')
   if (!is.numeric(max.iter)) stop('"max.iter" must be numeric')

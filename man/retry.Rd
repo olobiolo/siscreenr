@@ -4,7 +4,7 @@
 \alias{retry}
 \title{rerun a function call in case of error}
 \usage{
-retry(call, max.iter, fail = NA, verbose = FALSE)
+retry(call, max.iter, fail = NA, verbose = FALSE, ...)
 }
 \arguments{
 \item{call}{call to retry}
