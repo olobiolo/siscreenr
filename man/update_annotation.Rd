@@ -27,7 +27,7 @@ extract_field(x)
 \arguments{
 \item{infile}{file containing the original annotation;
 must be compatible with \code{\link[data.table]{fread}};
-deafults to internally sotred Dharmacon annotation from 16th May 2015
+deafults to internally stored Dharmacon annotation from 16th May 2015
 (plate numbers have been unified, originally each subset was numbered independently)}
 
 \item{outfile}{(optional) path to a file to save the updated annotation}
@@ -99,7 +99,7 @@ and the update will be run with original geneIDs rather than the updated ones.
 GeneBank queries are handled with the package \code{reutils}.
 Random errors that occur on queries are handled with \code{retry}.
 Data is loaded (and saved) with package \code{data.table}.
-Data processing is mostly done in base R, with (minimal) use of \code{dplyr} and \code{tidyr}.
+Data processing is mostly done in base R, with (minimal) use of \code{tidyr}.
 Several internal functions are called here, see \code{Functions}.
 }
 

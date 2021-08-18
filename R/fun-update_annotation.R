@@ -32,7 +32,7 @@
 #' GeneBank queries are handled with the package \code{reutils}.
 #' Random errors that occur on queries are handled with \code{retry}.
 #' Data is loaded (and saved) with package \code{data.table}.
-#' Data processing is mostly done in base R, with (minimal) use of \code{dplyr} and \code{tidyr}.
+#' Data processing is mostly done in base R, with (minimal) use of \code{tidyr}.
 #' Several internal functions are called here, see \code{Functions}.
 #'
 #' @section Processing time:
@@ -42,7 +42,7 @@
 #'
 #' @param infile file containing the original annotation;
 #'               must be compatible with \code{\link[data.table]{fread}};
-#'               deafults to internally sotred Dharmacon annotation from 16th May 2015
+#'               deafults to internally stored Dharmacon annotation from 16th May 2015
 #'               (plate numbers have been unified, originally each subset was numbered independently)
 #' @param outfile (optional) path to a file to save the updated annotation
 #' @param verbose logical whether or not to report progres,
@@ -81,11 +81,15 @@ update_annotation <- function(infile, outfile, verbose = FALSE, ...) {
   }
   # load original annotation
   if (verbose) message('loading annotation')
-  if (missing(infile))
-    infile <- 'extdata/ANNOTATION.LIBRARY.GENOMIC_20150416.original.plates.adjusted.txt'
-  annotation_original <- data.table::fread(file = infile, check.names = TRUE)
-  # data.table class will cause problems later on
-  annotation_original <- as.data.frame(annotation_original)
+  annotation_original <-
+      if (missing(infile)) {
+        readRDS('extdata/ANNOTATION.LIBRARY.GENOMIC_20150416.original.plates.adjusted.rds')
+        } else {
+          data.table::fread(file = infile, check.names = TRUE)
+        }
+
+  # drop data.table class as it would will cause problems
+  data.table::setDF(annotation_original)
 
   # TODO: check if file format is valid
 
@@ -192,7 +196,7 @@ update_annotation <- function(infile, outfile, verbose = FALSE, ...) {
     if (verbose) message('\t wrapping sequences')
     annotation_updated <- wrap('sequence')
   }
-  # and again to column "duplex_catalog_nuber
+  # and again to column "duplex_catalog_nuber"
   if (is.element('duplex_catalog_number', nms)) {
     if (verbose) message('\t wrapping duplex catalog number')
     annotation_updated <- wrap('duplex_catalog_number')
@@ -201,11 +205,13 @@ update_annotation <- function(infile, outfile, verbose = FALSE, ...) {
   # clean up duplicated rows, rearrange columns and rows
   if (verbose) message('\t rearranging')
   annotation_updated$new_geneid <- NULL
-  annotation_updated <- dplyr::select(annotation_updated, dplyr::one_of(
-    c('plate', 'position', 'geneid',
-      'gene_symbol', 'aliases', 'description', 'map_location', 'chromosome', 'gene_type',
-      'sequences', 'duplex_catalog_numbers', 'pool_catalog_number',
-      'withdrawn', 'replaced', 'original_geneid', 'original_gene_symbol')), dplyr::everything())
+  vars_wishlist <- c('plate', 'position', 'geneid',
+            'gene_symbol', 'aliases', 'description', 'map_location', 'chromosome', 'gene_type',
+            'sequences', 'duplex_catalog_numbers', 'pool_catalog_number',
+            'withdrawn', 'replaced', 'original_geneid', 'original_gene_symbol')
+  vars_present <- intersect(vars, names(annotation_updated))
+  vars_other <- setdiff(names(annotation_updated), vars_wishlist)
+  annotation_updated <- annotation_updated[c(vars_present, vars_other)]
   if (verbose) message('\t removing duplicate rows')
   annotation_updated <- annotation_updated[!duplicated(annotation_updated), ]
   if (verbose) message('\t reordering table')
@@ -264,6 +270,9 @@ check_geneids <- function(geneIDs, verbose, ...) {
   d <- as.data.frame(t(m), stringsAsFactors = FALSE)
   d$withdrawn <- as.logical(d$withdrawn)
   d <- tidyr::separate(d, 'replaced', c('replaced', 'new_geneid'), sep = 'ID: ')
+  # # TODO: remove tidyr
+  # strsplit(d$replaced, split = 'ID: ')
+  # # end TODO
   d$replaced <- ifelse(is.na(d$replaced), FALSE, TRUE)
   d$new_geneid <- as.numeric(d$new_geneid)
   return(d)
