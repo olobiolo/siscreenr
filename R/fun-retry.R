@@ -19,8 +19,8 @@
 #' or as defined by \code{fail}.
 #'
 #' @section Source:
-#' This function is taken from (my) package acutils:
-#' \href{http://github.com/olobiolo/acutils}{Github}.
+#' This function is lifted from package
+#' \href{http://github.com/olobiolo/acutils}{acutils}.
 #'
 #' @export
 #'

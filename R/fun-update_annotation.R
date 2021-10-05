@@ -209,7 +209,7 @@ update_annotation <- function(infile, outfile, verbose = FALSE, ...) {
             'gene_symbol', 'aliases', 'description', 'map_location', 'chromosome', 'gene_type',
             'sequences', 'duplex_catalog_numbers', 'pool_catalog_number',
             'withdrawn', 'replaced', 'original_geneid', 'original_gene_symbol')
-  vars_present <- intersect(vars, names(annotation_updated))
+  vars_present <- intersect(vars_wishlist, names(annotation_updated))
   vars_other <- setdiff(names(annotation_updated), vars_wishlist)
   annotation_updated <- annotation_updated[c(vars_present, vars_other)]
   if (verbose) message('\t removing duplicate rows')

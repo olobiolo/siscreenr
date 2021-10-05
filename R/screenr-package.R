@@ -1,9 +1,9 @@
 #' @title siscreenr: High Throughput Data Analysis
 #'
 #' @description
-#' A package for analyzing high throughput microscopy data produced by ScanR systems.
+#' A package for analyzing high throughput microscopy data produced by Olympus ScanR systems.
 #' Provides tools for loading, normalizing and scoring data, and hit selection.
-#' It is intended for interactive use so most of the functions leave a considerable amount of work to teh user.
+#' It is intended for interactive use so most of the functions leave a considerable amount of work to the user.
 #'
 #' @details
 #' The data is obtained with an automated fluorescence microscope and
@@ -18,7 +18,7 @@
 #' Data analysis:
 #' \itemize{
 #'   \item{
-#'   \code{build_screen} collate all data into a single data frame, reaarrange and add layout
+#'   \code{build_screen} collate all data into a single data frame, rearrange and add layout
 #'   }
 #'   \item{
 #'   \code{normalize} normalize data by one of the available methods:
@@ -28,7 +28,7 @@
 #'   \code{zscore} calculate (robust) z scores
 #'   }
 #'   \item{
-#'   \code{hitscore} classify data point as hit or not based on a given treshold; usually used on z scores
+#'   \code{hitscore} classify data point as hit or not based on a given threshold; usually used on z scores
 #'   }
 #   \item{
 #   \code{sumscore} calculate summary hit score and assign hit status to data point
@@ -104,7 +104,7 @@
 #'  \code{scan_status} report on the status of the latest and any acquisition errors
 #'  }
 #'  \item{
-#'  \code{retry} rerun call that randomly fails; taken from \code{link[acutils]{acutils}}
+#'  \code{retry} rerun call that randomly fails; taken from package \code{acutils}
 #'  }
 #' }
 #'
@@ -114,11 +114,33 @@
 # TODO
 # 1. shiny app for interactive results exploration
 #   scatter plot with tooltips, zoom, more...
-# 2. completely remove acutils dependencies
-#   retry in update_annotation
-#   retry in patch_annotation
-#   difficult as they are code-related, so exotic
-#   make them internal, perhaps?
 # 3. shiny app for scan error exploration to facilitate remote rescanning?
-#    idk, the text version seems to be ding well right now...
+#    idk, the text version seems to be doing well right now...
 # 4. shiny app for choosing z score threshold - this shouldn't be hard...
+#
+# 5. MAJOR: rewrite from ggplot to plotly
+#
+
+
+## KNOWN ISSUES
+
+# fix links in docs, e.g. here
+#
+# fetch_files: add option to ignore ParameterData
+#
+# separate_flag: add support for whole pltae rescanned (all)
+#
+# layouts: fails for files with single layouts
+#
+# build_screen: fails at <crossed out> renaming "wells" column </crossed out>
+#
+# zscore: fix help
+#
+# hitscore: fix typo (treshold)
+#
+# zscore: make sure methods work properly
+#
+# add quratile method for hit scoring
+#   two-tailed threshold in hit_score?
+#   specify scoring column in hit_score - present!
+#   shiny app to test out thresholds?

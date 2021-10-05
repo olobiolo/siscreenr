@@ -6,9 +6,9 @@
 \alias{siscreenr-package}
 \title{siscreenr: High Throughput Data Analysis}
 \description{
-A package for analyzing high throughput microscopy data produced by ScanR systems.
+A package for analyzing high throughput microscopy data produced by Olympus ScanR systems.
 Provides tools for loading, normalizing and scoring data, and hit selection.
-It is intended for interactive use so most of the functions leave a considerable amount of work to teh user.
+It is intended for interactive use so most of the functions leave a considerable amount of work to the user.
 }
 \details{
 The data is obtained with an automated fluorescence microscope and
@@ -22,7 +22,7 @@ However, it is compatible with other plate formats and some concepts can be tran
 Data analysis:
 \itemize{
   \item{
-  \code{build_screen} collate all data into a single data frame, reaarrange and add layout
+  \code{build_screen} collate all data into a single data frame, rearrange and add layout
   }
   \item{
   \code{normalize} normalize data by one of the available methods:
@@ -32,7 +32,7 @@ Data analysis:
   \code{zscore} calculate (robust) z scores
   }
   \item{
-  \code{hitscore} classify data point as hit or not based on a given treshold; usually used on z scores
+  \code{hitscore} classify data point as hit or not based on a given threshold; usually used on z scores
   }
 }
 
@@ -102,7 +102,7 @@ Miscellaneous:
  \code{scan_status} report on the status of the latest and any acquisition errors
  }
  \item{
- \code{retry} rerun call that randomly fails; taken from \code{link[acutils]{acutils}}
+ \code{retry} rerun call that randomly fails; taken from package \code{acutils}
  }
 }
 }

@@ -2,11 +2,14 @@ Package: siscreenr
 Title: Analyze Genome-Wide siRNA Screening Campaigns
 Version: 2.15.4
 Authors@R: 
-    person(given = "Aleksander",
-           family = "Chlebowski",
-           role = c("aut", "cre"),
-           email = "olobiolo@gmail.com")
-Maintainer: <olobiolo@gmail.com>
+    c(person(given = "Aleksander",
+             family = "Chlebowski",
+             role = "aut",
+             email = "olobiolo@gmail.com"),
+      person(given = "Aleksander",
+             family = "Chlebowski",
+             role = "cre",
+             email = "olobiolo@gmail.com"))
 Description: Data analysis tools for screening campaigns with a
     microscopic readout. Created to work with a genome-wide siRNA library
     and a ScanR imaging system, hence some idiosyncracies. Hopefully will
@@ -16,13 +19,13 @@ URL: http://github.com/olobiolo/siscreenr
 Depends: 
     R (>= 3.5.0)
 Imports: 
-    dplyr (>= 0.7.8),
-    tidyr (>= 0.8.2),
-    ggplot2 (>= 3.1.0),
     data.table (>= 1.12.2),
+    dplyr (>= 0.7.8),
+    ggplot2 (>= 3.1.0),
     lubridate (>= 1.7.4),
+    metamethods (>= 0.1.4),
     reutils (>= 0.2.3),
-    metamethods (>= 0.1.4)
+    tidyr (>= 0.8.2)
 Suggests: 
     testthat
 Remotes: 
