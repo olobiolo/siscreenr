@@ -3,8 +3,10 @@
 #'
 #' Determine cut-off thresholds for hit selection using the quartile method.
 #'
-#' A less error-prone method of identifying outliers in skewed distributions,
-#' see reference for details.
+#' A less error-prone method of identifying outliers in skewed distributions, see reference for details.
+#'
+#' \emph{c} factor of 1.7239 corresponds to a \emph{z} score threshold of 3 and an error rate of 0.0027.
+#' \emph{c} factor of 0.9826 corresponds to a \emph{z} score threshold of 2 and an error rate of 0.0455.
 #'
 #'
 #' @param x numeric vector or a data frame
