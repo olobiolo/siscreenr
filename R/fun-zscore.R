@@ -12,24 +12,26 @@
 #' the mean and standard deviation are replaced by the median and median absolute deviation,
 #' respectively.
 #'
-#' @param x a numeric vector
-#' @param robust logical flag whether to calculate normal or robust z scores
-#' @param deviations logical flag whether the supplied data is raw or normalized
-#' @param reference optional determination of reference observations;
-#'                  for the dafault method, a logical vector;
-#'                  for the data frame method, a logical vector
+#' @param x a numeric vector, a data.frame, or a grouped data frame
+#' @param robust logical flag; if TRUE (the default), calculate robust z scores
+#' @param deviations logical flag;
+#'                   set to FALSE (the default) if the supplied data is raw and
+#'                   to TRUE (the default) if it has been normalized
+#' @param reference optional specification of reference observations:
+#'                  for the default method, a logical vector,
+#'                  for the data frame method, either a logical vector
 #'                  or any predicate (bare or as string) that refers to \code{x}'s variables
 #' @param variables for data frame method, character vector of variables to standardize
 #' @param ... arguments passed to methods
 #'
-#' @return a numeric vector of z scores or a data frame with added columns of z scores
+#' @return A numeric vector of z scores or a data frame with added columns of z scores.
 #'
 #' @section Deviations:
-#' Data is accepted as raw or normalized and the function can be informed of this with a logical flag.
+#' Data can be raw or normalized and this is specified with a logical flag.
 #' For deviations the location parameter is assumed to be 0.
 #' If normalization is done by simply subtracting the mean/median of the whole sample
 #' from each data point, this is redundant but other normalization methods
-#' may introduce differences differences.
+#' may behave differently.
 
 #' @section Reference:
 #' Data points in the sample can be standardized against part
@@ -38,8 +40,8 @@
 #' within the data frame) to determine the reference subpopulation.
 #'
 #' @section Grouped data frames (\code{dplyr} package):
-#' The method for class \code{grouped_df} is home brewed as I don't know
-#' how to properly handle this class.
+#' The method for class \code{grouped_df} is home made because the native behavior
+#' of grouped data frames does not readily support functions that return data frames.
 #'
 #' @export
 
@@ -81,6 +83,7 @@ zscore.default <- function(x, robust = TRUE, deviations = FALSE, reference, ...)
 zscore.data.frame <- function(x, robust = TRUE, deviations = FALSE, reference, variables, ...) {
 
   # check arguments
+  force(x)
   if (missing(variables)) {
     message('no variables selected; taking all numeric variables except "well" and "column"')
     variables <- setdiff(names(Filter(is.numeric, x)), c('well', 'column'))

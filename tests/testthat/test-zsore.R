@@ -46,7 +46,7 @@ df1zTF <- data.frame(well = 1:3, row = rep('A', 3), column = 1:3,
 df1zTT <- data.frame(well = 1:3, row = rep('A', 3), column = 1:3,
                      var1 = 1:3, var2 = 1:3,
                      var1_zscore = c(1, 2, 3) / 1.4826, var2_zscore = c(1, 2, 3) / 1.4826)
-# for reference well %in% 1:3
+# for reference in wells 1:3
 df2 <- data.frame(well = 1:4, row = rep('A', 4), column = 1:4,
                   var1 = 1:4, var2 = 1:4)
 df2zFF <- data.frame(well = 1:4, row = rep('A', 4), column = 1:4,

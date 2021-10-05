@@ -81,7 +81,7 @@ It is best to create a separate variable to base the
 
 \section{Grouped data frames (\code{dplyr} package)}{
 
-The method for class \code{grouped_df} is home brewed as I don't know
-how to properly handle this class.
+The method for class \code{grouped_df} is home made because the native behavior
+of grouped data frames does not readily support functions that return data frames.
 }
 
