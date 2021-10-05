@@ -33,7 +33,7 @@ If a column in a screen object contains a string with a list of wells
 of interest, convert it into a logical vector that flags individual wells.
 }
 \details{
-During the screening campaign hardware or software erorrs may occur that
+During the screening campaign hardware or software errors may occur that
 could potentially affect individual wells or whole plates. This should be kept in mind
 and will typically be noted in the screen log file. If a problem is persistent,
 it is prudent to create a dedicated column to keep track of affected wells.
@@ -43,8 +43,10 @@ all problematic wells in a plate will likely be enumerated such that upon readin
 the log file, they will be contained in a single string, e.g. "A1, H17".
 
 In order to improve legibility of the screen report these comments, rather than
-be repeated as is for all wells, will be converted into a logical flag,
+be repeated as is for all wells, they will be converted into a logical flag,
 where the noted wells will get a \code{TRUE} value and the others will get a \code{FALSE}.
+
+Comments that read "all" or "whole plate" will flag all wells in that plate.
 }
 \section{Well identifiers}{
 

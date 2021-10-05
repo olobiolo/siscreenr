@@ -3,7 +3,7 @@
 #' If a column in a screen object contains a string with a list of wells
 #' of interest, convert it into a logical vector that flags individual wells.
 #'
-#' During the screening campaign hardware or software erorrs may occur that
+#' During the screening campaign hardware or software errors may occur that
 #' could potentially affect individual wells or whole plates. This should be kept in mind
 #' and will typically be noted in the screen log file. If a problem is persistent,
 #' it is prudent to create a dedicated column to keep track of affected wells.
@@ -13,8 +13,10 @@
 #' the log file, they will be contained in a single string, e.g. "A1, H17".
 #'
 #' In order to improve legibility of the screen report these comments, rather than
-#' be repeated as is for all wells, will be converted into a logical flag,
+#' be repeated as is for all wells, they will be converted into a logical flag,
 #' where the noted wells will get a \code{TRUE} value and the others will get a \code{FALSE}.
+#'
+#' Comments that read "all" or "whole plate" will flag all wells in that plate.
 #'
 #' @section Well identifiers:
 #' A well can be identified in two ways: by a number from 1 through the number of wells in a plate
@@ -51,24 +53,32 @@
 separate_flag <- function(scr, flag = 'wells_rescanned', newname,
                           sep = ', ', well.ID = 'position') {
   #check arguments
-  if (!is.element(well.ID, colnames(scr))) stop('invalid column name in "well.ID"')
+  if (!is.data.frame(scr)) stop("\"scr\" must be a data.frame")
   if (!is.element(flag, colnames(scr))) stop('invalid column name in "flag"')
+  if (!missing(newname)) {
+    if (!is.character(newname) || length(newname) != 1)
+      stop('"newname" must be a character string')
+  }
+  if (!is.character(sep)) stop('"sep" must be a character string')
+  if (!is.element(well.ID, colnames(scr))) stop('invalid column name in "well.ID"')
+
   # isolate well.ID
   A <- scr[[well.ID]]
   # isolate flag and split the string
   B <- strsplit(scr[[flag]], split = sep)
   # compare the two
   C <- mapply(is.element, A, B)
+  # recognize when the whole plate has been affected
+  D <- ifelse(B[[flag]] == "all", TRUE, C)
+  D <- ifelse(grepl("whole plate", B[[flag]]), TRUE, D)
   # replace original column in scr
-  scr[[flag]] <- C
+  scr[[flag]] <- D
 
   # change column name if required or return
-  if (missing(newname)) return(scr) else {
-    if (!is.character(newname) || length(newname) != 1) {
-      stop('"newname" must be a character string')
-    }
-    ind <- which(colnames(scr) == flag)
-    colnames(scr)[ind] <- newname
+  if (missing(newname)) {
+    return(scr)
+  } else {
+    colnames(scr)[grep(flag, colnames(scr))] <- newname
     return(scr)
   }
 }
