@@ -17,7 +17,8 @@ otherwise may be any directory;
 a non-existing one will be created}
 
 \item{object}{regular expression that defines which ParameterData files to copy;
-defaults to Main as this is always present and usually is the only relevant one}
+defaults to Main as this is always present and usually is the only relevant one;
+set to NULL to skip ParameterData files}
 }
 \description{
 Copy all ScanR result files, chosen parameter data files, and the screen log

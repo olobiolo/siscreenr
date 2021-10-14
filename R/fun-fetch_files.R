@@ -25,7 +25,8 @@
 #'                 otherwise may be any directory;
 #'                 a non-existing one will be created
 #' @param object regular expression that defines which ParameterData files to copy;
-#'               defaults to Main as this is always present and usually is the only relevant one
+#'               defaults to Main as this is always present and usually is the only relevant one;
+#'               set to NULL to skip ParameterData files
 #'
 #' @export
 
@@ -54,11 +55,15 @@ fetch_files <- function(where.from, where.to, object = 'Main') {
   dirs <- list.dirs(full.names = FALSE, recursive = FALSE)
   # do the deed
   for (d in dirs) {
-    setwd(d);
-    # prepare names for parameter data files
-    oldpath <- paste0('ParameterData_', object,'.txt')
-    newpath <- paste0(where.to, 'ParameterData_', object, '_', d,'.txt')
-    file.copy(from = oldpath, to = newpath, overwrite = TRUE)
+    # move to scan directory
+    setwd(d)
+    # copy parameter data files
+    if (!is.null(object)) {
+      oldpath <- paste0('ParameterData_', object,'.txt')
+      newpath <- paste0(where.to, 'ParameterData_', object, '_', d,'.txt')
+      file.copy(from = oldpath, to = newpath, overwrite = TRUE)
+    }
+    # copy population result files
     if (dir.exists('Population Results')) {
       setwd('Population Results')
       files <- list.files()
