@@ -5,13 +5,15 @@
 #' layouts for different plating dates and these may be different.
 #'
 #' This is a utility function for neatly putting together many layouts.
-#' Sometimes a layout changes over the course of the screen. In that case it is easy (if a little tedious)
-#' to prepare a composite layout file with a separate column for every plating date.
+#' Sometimes a layout changes over the course of the screen.
+#' In that case it is easy (if a little tedious) to prepare a composite layout file
+#' with a separate column for every plating date.
 #' This function will load all such files and convert them into a single file
 #' that can be loaded with \code{\link{build_screen}}.
-#' If your screen maintains the same layout throughout, runninng this function is redundant.
+#' If your screen maintains the same layout throughout, running this function is redundant.
 #'
-#' The output file is a tab delimited text file that contains a narrow format table with the columns:
+#' The output file is a tab delimited text file that contains a long-form table
+#' with the following columns:
 #' \code{well}, \code{well_type}, \code{plate_type}, and possibly \code{plated}.
 #'
 #' Input files \strong{must} follow these rules:
