@@ -7,9 +7,9 @@
 #' this function goes into all scan directories and locates all files in the
 #' "Population Data" subdirectory (including hidden ones), as well as any "ParameterData" files that
 #' contain an object name specified by a regular expression (\code{object}).
-#' All files are copied to a specified directory. Previously present files will be overrwritten.
+#' All files are copied to a specified directory. Previously present files will be overwritten.
 #'
-#' Names of scan directories, which are usually plate numebrs,
+#' Names of scan directories, which are usually plate numbers,
 #' are added to all respective file names.
 #'
 #' If the master directory contains a file with a name matching the regex "screenlog",
