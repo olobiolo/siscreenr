@@ -27,12 +27,12 @@ extract_field(x)
 \arguments{
 \item{infile}{file containing the original annotation;
 must be compatible with \code{\link[data.table]{fread}};
-deafults to internally stored Dharmacon annotation from 16th May 2015
+defaults to internally stored Dharmacon annotation from 16th May 2015
 (plate numbers have been unified, originally each subset was numbered independently)}
 
 \item{outfile}{(optional) path to a file to save the updated annotation}
 
-\item{verbose}{logical whether or not to report progres,}
+\item{verbose}{logical whether or not to report progress,}
 
 \item{...}{ellipsis to facilitate control of internal functions' verbosity}
 }

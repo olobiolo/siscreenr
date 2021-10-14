@@ -76,7 +76,7 @@ highlight_genes <- function(canvas, data, genes, x.variable, y.variable,
 #' @param x.treshold,y.treshold,outer.limit coordinates that determine section borders
 #'                                          x.treshold and y.treshold may be determined
 #'                                          as numeric vectors of length one or two
-#' @param categories names for sections, in order to appear in the plto legend
+#' @param categories names for sections, in order to appear in the plot legend
 #' @param category.layout matrix that maps categories to sections; numbers refer to categories
 #' @param colpal colors to assign to sections, in the same order as categories
 #'

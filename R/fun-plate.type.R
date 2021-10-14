@@ -6,7 +6,7 @@
 #' Manage the translation of plate type codes during building a screen object.
 #'
 #' @details
-#' During building a acreen object \code{build_screen} calls the internal function
+#' During building a screen object \code{build_screen} calls the internal function
 #' \code{plate.type.converter} to read the plate type
 #' encoded in field 4 of the plate name and create the columns
 #' \code{plate_type} and \code{replica} accordingly.
@@ -30,7 +30,7 @@ plate.type.converter <- function(x) {
   key <- utils::read.delim(thefile, stringsAsFactors = FALSE)
   if (!is.data.frame(key)) stop('the dictionary file must a data frame', '\n\t',
                                 'see: ?plate.type')
-  # convert all non-factor columns to factor (slightly overcomplicated)
+  # convert all non-factor columns to factor (slightly over-complicated)
   if (any(sapply(key, is.factor))) {
     key <- cbind(
       Filter(Negate(is.factor), key),

@@ -46,7 +46,7 @@ color_sections(
 x.treshold and y.treshold may be determined
 as numeric vectors of length one or two}
 
-\item{categories}{names for sections, in order to appear in the plto legend}
+\item{categories}{names for sections, in order to appear in the plot legend}
 
 \item{category.layout}{matrix that maps categories to sections; numbers refer to categories}
 

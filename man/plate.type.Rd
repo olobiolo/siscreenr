@@ -29,7 +29,7 @@ recover_conversion_key()
 Manage the translation of plate type codes during building a screen object.
 }
 \details{
-During building a acreen object \code{build_screen} calls the internal function
+During building a screen object \code{build_screen} calls the internal function
 \code{plate.type.converter} to read the plate type
 encoded in field 4 of the plate name and create the columns
 \code{plate_type} and \code{replica} accordingly.

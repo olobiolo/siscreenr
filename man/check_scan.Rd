@@ -18,18 +18,21 @@ return/list for returning a named list;
 determined by partial match}
 }
 \value{
-In concole/print mode - nothing. In list/return mode, a named list.
-Inromation on scan completion by \code{scan_status} only appears in console mode.
+In console/print mode - nothing. In list/return mode, a named list.
+Information on scan completion by \code{scan_status} only appears in console mode.
 }
 \description{
-Report wells with missing images or logged events (e.g. erros).
+Report wells with missing images or logged events (e.g. errors).
 }
 \details{
-The function firt lists all directories in a given location
-and identifies recent scans by their numeric postfixes.
+This is a reporting utility specific to ScanR systems.
+
+\code{check_scan} first lists all directories in a given location
+and identifies recent scans by their numeric suffixes
 Thereafter, it lists all .tif files in the appropriate data directories
 and checks the well names, for which the number of collected images
 is different to the maximum of all wells.
+
 \code{scan_status} also checks which wells (if any) had any events logged
 in the ScanR acquisition log and (in console mode) informs whether the scan
 is complete or still ongoing.
