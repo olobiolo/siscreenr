@@ -3,17 +3,18 @@
 #' Copy all ScanR result files, chosen parameter data files, and the screen log
 #' into a single location.
 #'
-#' Given the location of a master directory, i.e. one where multiple scans are stored,
-#' this function goes into all scan directories and locates all files in the
-#' "Population Data" subdirectory (including hidden ones), as well as any "ParameterData" files that
-#' contain an object name specified by a regular expression (\code{object}).
-#' All files are copied to a specified directory. Previously present files will be overwritten.
+#' The master directory specified by \code{where.from} will contain scan directories,
+#' which may contain exported result files stored in "Population Data" subdirectories.
+#' They may also contain parameter data files, which are named
+#' "ParameterData_\code{object}.txt".
+#' All result files and parameter data files where object name matches \code{object}
+#' will be copied to the \code{where.to} directory. Hidden files will be omitted.
 #'
 #' Names of scan directories, which are usually plate numbers,
 #' are added to all respective file names.
 #'
-#' If the master directory contains a file with a name matching the regex "screenlog",
-#' it will also be copied.
+#' If the master directory contains a file with a name matching the regex
+#' "screenlog", it will also be copied.
 #'
 #' Sort the copied files as you wish.
 #'
@@ -25,8 +26,7 @@
 #'                 otherwise may be any directory;
 #'                 a non-existing one will be created
 #' @param object regular expression that defines which ParameterData files to copy;
-#'               defaults to Main as this is always present and usually is the only relevant one;
-#'               set to NULL to skip ParameterData files
+#'               defaults to Main; set to NULL to skip ParameterData files
 #'
 #' @export
 
