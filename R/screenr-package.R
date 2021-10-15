@@ -70,7 +70,7 @@
 #' Visualization:
 #' \itemize{
 #'  \item{
-#'  \code{plot_screen_progress} create a plot of material accummulation/processing over time
+#'  \code{plot_screen_progress} create a plot of material accumulation/processing over time
 #'  }
 #'  \item{
 #'  \code{drawmeabarplot} plot mean green fraction z scores and highlight desired genes

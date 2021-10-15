@@ -29,7 +29,7 @@ This is a reporting utility specific to ScanR systems.
 
 \code{check_scan} first lists all directories in a given location
 and identifies recent scans by their numeric suffixes
-Thereafter, it lists all .tif files in the appropriate data directories
+Then, it lists all .tif files in the appropriate data directories
 and checks the well names, for which the number of collected images
 is different to the maximum of all wells.
 
