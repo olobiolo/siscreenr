@@ -93,7 +93,6 @@ Also we load layout and annotation separately, the column is redundant anyway.
 \section{Dependencies}{
 
 Data files are loaded with \code{read.delim}.
-Some operations are done with \code{tidyr}.
 Dates are handled with \code{lubridate}.
 A number of internal functions are used.
 }

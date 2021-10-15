@@ -26,22 +26,22 @@ NULL
 #' @keywords internal
 #'
 plate.type.converter <- function(x) {
-  thefile <- paste0(path.package('siscreenr'), '/extdata/plate.type.converter.key.txt')
+  thefile <- system.file("extdata", "plate.type.converter.key.txt", package = "siscreenr")
   key <- utils::read.delim(thefile, stringsAsFactors = FALSE)
   if (!is.data.frame(key)) stop('the dictionary file must a data frame', '\n\t',
                                 'see: ?plate.type')
-  # convert all non-factor columns to factor (slightly over-complicated)
-  if (any(sapply(key, is.factor))) {
-    key <- cbind(
-      Filter(Negate(is.factor), key),
-      as.data.frame(lapply(Filter(Negate(is.factor), key), factor))
-    )
-  }
-  dots.replica <- c(stats::setNames(as.list(key$replica), key$code), 'unknown')
-  dots.type <- c(stats::setNames(as.list(key$plate_type), key$code), 'unknown')
+  # convert all non-factor columns to factor
+  ind <- vapply(key, is.factor, logical(1))
+  if (any(ind)) key[ind] <- lapply(key[ind], factor)
+  # convert codes descriptors
+  ## for each column a converting function is created that calls switch
+  ## alternatives for switch
+  dots.replica <- c(structure(as.list(key$replica), names = key$code), 'unknown')
+  dots.type <- c(structure(as.list(key$plate_type), names = key$code), 'unknown')
+  ## create functions
   f_replica <- function(x) do.call(switch, c(x, dots.replica))
   f_plate_type <- function(x) do.call(switch, c(x, dots.type))
-
+  ## apply functions
   x$replica <- vapply(x$plate_type, f_replica, character(1))
   x$plate_type <- vapply(x$plate_type, f_plate_type, character(1))
 

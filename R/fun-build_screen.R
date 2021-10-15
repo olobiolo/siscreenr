@@ -88,11 +88,13 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
   plates.logged <- screenlog[, 1]
   if (length(plates.logged) == 0) stop('no plates logged(?); check screen log file')
   data.files <- list.files(path = datadir)
-  plates.filed <- sapply(data.files, function(x) strsplit(x, split = '_')[[1]][1])
+  # plates.filed <- structure(tools::file_path_sans_ext(data.files), names = data.files)
+  # TODO
+  plates.filed <- structure(sub("_.*|\\.txt", "", data.files), names = data.files)
   if (length(plates.filed) == 0) stop('no result files')
   # load a random file to test "wells" argument
-  test_file <- utils::read.delim(sample(list.files(datadir, full.names = TRUE), 1), stringsAsFactors = FALSE)
-  if (!is.element(wells, names(test_file))) stop('column "', wells, '" not found; check "wells" argument')
+  test.file <- utils::read.delim(sample(list.files(datadir, full.names = TRUE), 1), stringsAsFactors = FALSE)
+  if (!is.element(wells, names(test.file))) stop('column "', wells, '" not found; check "wells" argument')
   if (verbose) {
     cat(length(plates.filed), 'result files found: \n')
     print(cbind(sort(as.vector(plates.filed))))
@@ -128,32 +130,34 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
   }
 
   # read and reformat additional information
-  names(scr)[which(names(scr) == wells)] <- 'well'
-  scr[c('platen', 'extension')] <- do.call(rbind, strsplit(scr$filename, sep = '_'))
-  scr$filename <- NULL
+  names(scr)[match(wells, names(scr))] <- 'well'
+  # scr$plateno <- tools::file_path_sans_ext(scr$filename)
+  scr$plateno <- sub("_.*|\\.txt", "", scr$filename)
   scr <- merge(screenlog, scr, by = 'plateno', all.x = FALSE, all.y = TRUE)
-  scr[c('plate', 'prepared', 'screen', 'replica')] <- do.call(rbind, strsplit(scr$plateno, sep = "\\."))
-  scr$plateno <- NULL
+  scr[c('plate', 'prepared', 'screen', 'replica')] <- do.call(rbind, strsplit(scr$plateno, split = "\\."))
   scr$plate_type <- substring(scr$replica, 1, 1)
   scr$number <- substring(scr$replica, 2)
-  scr$replica <- NULL
   scr$plate <- as.numeric(gsub('[A-Z]', '', scr$plate))
   scr <- plate.type.converter(scr)
   scr$replica <- paste(scr$replica, scr$number, sep = "")
-  scr$number <- NULL
   scr <- merge(lay, scr, all.x = TRUE, all.y = FALSE)
   scr[c('plated', 'prepared', 'imaged')] <- lapply(scr[c('plated', 'prepared', 'imaged')], lubridate::ymd)
-  scr$extension <- NULL
+  # clean up
+  scr[c('filename', 'plateno', 'number')] <- NULL
 
   # change zeros to NAs if required
   if (zero.to.NA) {
     if (verbose) cat('replacing zeros... \n')
-    scr <- build_screen.replace_zeros(scr)
+    scr <- build_screen.replace_zeros(scr, verbose)
   }
 
   # reorder by plate number, replica number and well number
   if (verbose) cat('reordering... \n')
-  scr <- scr[order(scr$plate, scr$replica, scr$plated, scr$imaged, scr$column, scr$row), ]
+  column.wishlist <- c('plate', 'well', 'position', 'row', 'column',
+                       'screen', 'replica', 'plate_type', 'well_type',
+                       'prepared', 'plated', 'imaged')
+  column.order <- c(column_wishlist, setdiff(names(scr), column_wishlist))
+  scr <- scr[order(scr$plate, scr$replica, scr$plated, scr$imaged, scr$column, scr$row), column_order]
 
   if (verbose) cat('\nready! \n')
   invisible(scr)
@@ -224,10 +228,7 @@ build_screen.remove_columns <- function(x, rem.col) {
 }
 
 # change zeros to NAs
-build_screen.replace_zeros <- function(x) {
-  verbose <- get('verbose', envir = parent.frame(1))
-  # TODO
-  # verbose <- dynGet('verbose', ifnotfound = FALSE)
+build_screen.replace_zeros <- function(x, verbose) {
   na.count.before <- sum(is.na(x))
   zero.count <- sum(x == 0, na.rm = TRUE)
   x[x == 0] <- NA
