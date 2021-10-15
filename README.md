@@ -12,32 +12,30 @@ The package is designed to be used in siRNA based screening campaigns with micro
 
 Run the following to install the package:
 
-`devtools::install_github("olobiolo/siscreenr")`
-
-You may need to install the `devtools` package beforehand:
-
-`install.packages("devtools")`
+```
+if (!requireNamespace("remotes")) install.packages("remotes")
+remotes::install_github("olobiolo/siscreenr")
+```
 
 <br>
 
 ## Dependencies:
 
 - Reading and writing large files is done with package `data.table`.
-- Data processing is done mostly in base R with minimal use of packages `dplyr` and `tidyr`.
 - Dates are handled with package `lubridate`.
 - Plotting is done with packages `ggplot2` and `lattice`.
-- GeneBank data base is queried with packare `reutils`.
+- [GeneBank](https://www.ncbi.nlm.nih.gov/genbank/) data base is queried with package `reutils`.
 - Finally, some S3 methods are created with package `metamethods`.
 
 ## Literature and Inspirations
 
-- Hadley Wickham's Advanced R (https://adv-r.hadley.nz/).
+- Hadley Wickham's [Advanced R](https://adv-r.hadley.nz/).
 
-- Patrick Burns's The R inferno (https://www.burns-stat.com/pages/Tutor/R_inferno.pdf).
+- Patrick Burns's [The R inferno](https://www.burns-stat.com/pages/Tutor/R_inferno.pdf).
 
-- Hadley Wickham's dplyr and tidyr, later incorporated into tidyverse (https://www.tidyverse.org/).
+- Version 2 was built using packages `dplyr` and `tidyr`, later incorporated into [tidyverse](https://www.tidyverse.org/).
 
-Slowly but surely transitioning away from using tidyverse in favor of data.table (https://www.rdocumentation.org/packages/data.table/versions/1.12.8).
+- Version 3 abandons the `tidyr` and `dplyr` in favor of [data.table](https://www.rdocumentation.org/packages/data.table). `dplyr` is only used in utnit tests.
 
 <br>
 

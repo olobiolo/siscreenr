@@ -24,8 +24,7 @@ Imports:
     ggplot2 (>= 3.1.0),
     lubridate (>= 1.7.4),
     metamethods (>= 0.1.4),
-    reutils (>= 0.2.3),
-    tidyr (>= 0.8.2)
+    reutils (>= 0.2.3)
 Suggests: 
     testthat
 Remotes: 
