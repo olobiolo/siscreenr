@@ -99,7 +99,7 @@ and the update will be run with original geneIDs rather than the updated ones.
 GeneBank queries are handled with the package \code{reutils}.
 Random errors that occur on queries are handled with \code{retry}.
 Data is loaded (and saved) with package \code{data.table}.
-Data processing is mostly done in base R, with (minimal) use of \code{tidyr}.
+Data processing is done in base R.
 Several internal functions are called here, see \code{Functions}.
 }
 

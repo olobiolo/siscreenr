@@ -32,7 +32,7 @@
 #' GeneBank queries are handled with the package \code{reutils}.
 #' Random errors that occur on queries are handled with \code{retry}.
 #' Data is loaded (and saved) with package \code{data.table}.
-#' Data processing is mostly done in base R, with (minimal) use of \code{tidyr}.
+#' Data processing is done in base R.
 #' Several internal functions are called here, see \code{Functions}.
 #'
 #' @section Processing time:
@@ -269,10 +269,7 @@ check_geneids <- function(geneIDs, verbose, ...) {
   m <- vapply(geneIDs, function(x) check_geneid_status_with_pause(x, verbose, ...), character(4))
   d <- as.data.frame(t(m), stringsAsFactors = FALSE)
   d$withdrawn <- as.logical(d$withdrawn)
-  d <- tidyr::separate(d, 'replaced', c('replaced', 'new_geneid'), sep = 'ID: ')
-  # # TODO: remove tidyr
-  # strsplit(d$replaced, split = 'ID: ')
-  # # end TODO
+  d[c('replaced', 'new_geneid')] <- do.call(strsplit(d$replaced, sep = 'ID: '))
   d$replaced <- ifelse(is.na(d$replaced), FALSE, TRUE)
   d$new_geneid <- as.numeric(d$new_geneid)
   return(d)
