@@ -153,5 +153,3 @@ get_from_one <- function(dir, where.from, where.to.data, where.to.paramdata, obj
   }
   if (verbose) cat("\t", "done", "\n\n")
 }
-
-# setwd(system.file(package = "siscreenr")); setwd("..")
