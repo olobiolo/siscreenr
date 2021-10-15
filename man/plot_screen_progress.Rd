@@ -15,8 +15,7 @@ will be created in the "results" directory;
 set to NULL to send plot to current graphics device}
 }
 \value{
-Nothing. A plot is printed if \code{file} is missing,
-otherwise a 600x800 px png file is created in \code{directory}.
+A \code{ggplot} object if \code{plot} is NULL or the file path otherwise.
 }
 \description{
 Create a barplot that shows how many plates were created and imaged
