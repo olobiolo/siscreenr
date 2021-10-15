@@ -64,7 +64,6 @@
 #'
 #' @section Dependencies:
 #' Data files are loaded with \code{read.delim}.
-#' Some operations are done with \code{tidyr}.
 #' Dates are handled with \code{lubridate}.
 #' A number of internal functions are used.
 #'
@@ -130,13 +129,18 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
 
   # read and reformat additional information
   names(scr)[which(names(scr) == wells)] <- 'well'
-  scr <- tidyr::separate(scr, 'filename', c('plateno','extension'), sep = '_')
+  scr[c('platen', 'extension')] <- do.call(rbind, strsplit(scr$filename, sep = '_'))
+  scr$filename <- NULL
   scr <- merge(screenlog, scr, by = 'plateno', all.x = FALSE, all.y = TRUE)
-  scr <- tidyr::separate(scr, 'plateno', c('plate', 'prepared', 'screen', 'replica'), sep = '\\.')
-  scr <- tidyr::separate(scr, 'replica', c('plate_type', 'number'), sep = 1)
+  scr[c('plate', 'prepared', 'screen', 'replica')] <- do.call(rbind, strsplit(scr$plateno, sep = "\\."))
+  scr$plateno <- NULL
+  scr$plate_type <- substring(scr$replica, 1, 1)
+  scr$number <- substring(scr$replica, 2)
+  scr$replica <- NULL
   scr$plate <- as.numeric(gsub('[A-Z]', '', scr$plate))
   scr <- plate.type.converter(scr)
-  scr <- tidyr::unite(scr, 'replica', 'replica', 'number', sep = '')
+  scr$replica <- paste(scr$replica, scr$number, sep = "")
+  scr$number <- NULL
   scr <- merge(lay, scr, all.x = TRUE, all.y = FALSE)
   scr[c('plated', 'prepared', 'imaged')] <- lapply(scr[c('plated', 'prepared', 'imaged')], lubridate::ymd)
   scr$extension <- NULL
@@ -173,13 +177,14 @@ build_screen.layout <- function(layout) {
               it seems well position (row and column) is not defined in the layout file
               this may cause problems down the line')
     } else {
-      lay <- tidyr::separate(lay, col = 'position', sep = 1, into = c('row', 'column'),
-                             remove = F, convert = F)
+      lay$row <- substring(lay$position, 1, 1)
+      lay$column <- substring(lay$position, 2)
     }
   }
   # if there is a column called "date" but not one called "plated", it will be renamed to such
   if (is.element('date', lay.colnames) & !is.element('plated', lay.colnames)) {
-    names(lay)[lay.colnames == 'date'] <- 'plated'
+    names(lay)[names(lay) == 'date'] <- 'plated'
+    message("column \"date\" renamed to \"plated\"")
   }
   return(lay)
 }
@@ -199,7 +204,7 @@ build_screen.remove_columns <- function(x, rem.col) {
   if (is.character(rem.col)) {
     # columns to remove that are indeed present
     rem.present <- rem.col[is.element(rem.col, cols)]
-    # coumns to remove that are absent
+    # columns to remove that are absent
     rem.absent <- rem.col[!is.element(rem.col, cols)]
     # throw message if some requests absent
     if (length(rem.absent) > 0) {
@@ -221,6 +226,8 @@ build_screen.remove_columns <- function(x, rem.col) {
 # change zeros to NAs
 build_screen.replace_zeros <- function(x) {
   verbose <- get('verbose', envir = parent.frame(1))
+  # TODO
+  # verbose <- dynGet('verbose', ifnotfound = FALSE)
   na.count.before <- sum(is.na(x))
   zero.count <- sum(x == 0, na.rm = TRUE)
   x[x == 0] <- NA
