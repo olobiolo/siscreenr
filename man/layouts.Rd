@@ -4,15 +4,15 @@
 \alias{layouts}
 \title{collate layout file for a screen}
 \usage{
-layouts(..., file)
+layouts(..., outfile = NULL)
 }
 \arguments{
-\item{...}{files to load and collate, given as one or more character vectors}
+\item{...}{files or a character vector of files to load and collate}
 
-\item{file}{file to save the layout in}
+\item{outfile}{file to save the layout in}
 }
 \value{
-if \code{file} is missing, the collated layout table, otherwise nothing
+If \code{outfile} is not specified, the collated layout table, otherwise nothing.
 }
 \description{
 Take any number of layout files and create a single layout file.
@@ -28,7 +28,8 @@ This function will load all such files and convert them into a single file
 that can be loaded with \code{\link{build_screen}}.
 If your screen maintains the same layout throughout, running this function is redundant.
 
-The output file is a tab delimited text file that contains a narrow format table with the columns:
+The output file is a tab delimited text file that contains a long-form table
+with the following columns:
 \code{well}, \code{well_type}, \code{plate_type}, and possibly \code{plated}.
 
 Input files \strong{must} follow these rules:
@@ -46,4 +47,16 @@ Input files \strong{must} follow these rules:
 the name of which must be the plating date in yyyymmdd format (legal separators are allowed)
 
 There should also be a "position" column or "row" and "column" columns but this is optional.
+}
+\examples{
+L <- layouts('layout_S14_test.txt',
+             'layout_S14_control.txt')
+head(L)
+table(L$plated, L$well_type, L$plate_type)
+
+layouts('layout_S14_test.txt',
+        'layout_S14_control.txt',
+        outfile = 'temp_layout_S14.txt')
+head(read.delim('temp_layout_S14.txt'))
+
 }

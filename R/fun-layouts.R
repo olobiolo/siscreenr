@@ -32,45 +32,13 @@
 #'
 #' There should also be a "position" column or "row" and "column" columns but this is optional.
 #'
-#' @param ... files to load and collate, given as one or more character vectors
-#' @param file file to save the layout in
+#' @param ... files or a character vector of files to load and collate
+#' @param outfile file to save the layout in
 #'
-#' @return if \code{file} is missing, the collated layout table, otherwise nothing
+#' @return If \code{outfile} is not specified, the collated layout table, otherwise nothing.
 #'
 #' @export
 #'
-
-layouts <- function(..., file) {
-  # change global option and clean up afterwards
-  options(stringsAsFactors = FALSE)
-  on.exit(options(stringsAsFactors = TRUE))
-  # capture files
-  files <- unique(unlist(list(...)))
-  if (length(files) == 0) stop('no files defined')
-  if (!all(file.exists(files))) {
-    warning('some files are missing and will be omitted')
-    files <- files[file.exists(files)]
-  }
-  if (length(files) == 0) stop('no existing files defined')
-
-  # define function that will load single file and process it accordingly
-  process_layout <- function(x) {
-    X <- utils::read.delim(x)
-    if (!is.element('plate_type', names(X))) {
-      X_name_split <- unlist(strsplit(x, '_|\\.'))
-      X$plate_type <- X_name_split[length(X_name_split) - 1]
-    }
-    y <- tidyr::gather(X, 'plated', 'well_type', dplyr::matches('[0-9]{8}'))
-    y$plated <- gsub('^X', '', y$plated)
-    return(y)
-  }
-
-  # apply the function over all requested files
-  L <- do.call(rbind, lapply(files, process_layout))
-
-  if (missing(file)) return(L) else utils::write.table(L, file, quote = F, sep = '\t', row.names = F)
-}
-
 #' @examples
 #' L <- layouts('layout_S14_test.txt',
 #'              'layout_S14_control.txt')
@@ -79,5 +47,57 @@ layouts <- function(..., file) {
 #'
 #' layouts('layout_S14_test.txt',
 #'         'layout_S14_control.txt',
-#'         file = 'temp_layout_S14.txt')
+#'         outfile = 'temp_layout_S14.txt')
 #' head(read.delim('temp_layout_S14.txt'))
+#'
+layouts <- function(..., outfile = NULL) {
+  # capture files
+  files <- list(...)
+  if (length(files) == 0) stop('no files specified')
+  if (!all(vapply(files, is.character, logical(1)))) stop('all input files must be specified as character vectors')
+  files <- unique(unlist(files))
+  if (!all(file.exists(files))) {
+    files <- files[file.exists(files)]
+    if (length(files) == 0) stop('no existing files specified')
+    warning('some files are missing and will be omitted')
+  }
+
+  # validate files, condition 2
+  check_column_well <- function(file) {
+    X <- utils::read.delim(file)
+    if (is.element("well", names(X)) && is.integer(X$well)) return(TRUE) else return(FALSE)
+  }
+  if (!all(vapply(files, check_column_well, logical(1)))) stop("all files must contain column \"well\"")
+  # validate files, condition 4
+  check_column_well_type <- function(file) {
+    X <- utils::read.delim(file)
+    if (is.element("well_type", names(X))) return(TRUE) else return(FALSE)
+  }
+  if (length(files) == 1L && !check_column_well_type(files))
+    stop("single alyout file must contain column \"well_type\"")
+
+  # apply processing function over all files
+  L <- data.table::rbindlist(lapply(files, process_layout))
+
+  if (is.null(outfile)) return(L) else utils::write.table(L, outfile, quote = FALSE, sep = '\t', row.names = FALSE)
+}
+
+# internal function that will load single file and process it accordingly
+process_layout <- function(x) {
+  # load file
+  X <- utils::read.delim(x)
+  # attempt to extract plate type from file name
+  if (!is.element('plate_type', names(X))) {
+    X_name_split <- unlist(strsplit(x, '_|\\.'))
+    X$plate_type <- X_name_split[length(X_name_split) - 1]
+  }
+  # transform to long-form
+  y <- data.table::melt(data.table::as.data.table(X),
+                        measure.vars = grep("[0-9]{8}", names(X)),
+                        variable.name = "plated", value.name = "well_type",
+                        variable.factor = FALSE, value.factor = FALSE)
+  # fix dates
+  if (is.element("plated", names(y))) y[, plated := gsub('^X', '', plated)]
+
+  return(y)
+}
