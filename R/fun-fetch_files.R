@@ -117,7 +117,6 @@ get_from_one <- function(dir, where.from, where.to.data, where.to.paramdata, obj
     paramfiles <- list.files(path = paste(where.from, dir, sep = '/'), pattern = object, full.names = TRUE)
     if (length(paramfiles) > 0) {
       if (!dir.exists(where.to.paramdata)) {
-        # if (verbose) cat("\t\t", "creating directory", "\n")
         failed <- dir.create(where.to.paramdata)
         if (failed) stop("could not create directory ", where.to.paramdata)
       }
@@ -139,7 +138,6 @@ get_from_one <- function(dir, where.from, where.to.data, where.to.paramdata, obj
     datafiles <- list.files(path = popdir, full.names = TRUE)
     if (length(datafiles) > 0) {
       if (!dir.exists(where.to.data)) {
-        # if (verbose) cat("\t\t", "creating directory", "\n")
         failed <- dir.create(where.to.data)
         if (failed) stop("could not create directory ", where.to.paramdata)
       }
