@@ -35,7 +35,7 @@ remotes::install_github("olobiolo/siscreenr")
 
 - Version 2 was built using packages `dplyr` and `tidyr`, later incorporated into [tidyverse](https://www.tidyverse.org/).
 
-- Version 3 abandons the `tidyr` and `dplyr` in favor of [data.table](https://www.rdocumentation.org/packages/data.table). `dplyr` is only used in utnit tests.
+- Version 3 abandons the `tidyr` and `dplyr` in favor of [data.table](https://www.rdocumentation.org/packages/data.table). `dplyr` is only used in unit tests.
 
 <br>
 
