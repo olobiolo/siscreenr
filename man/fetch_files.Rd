@@ -4,7 +4,7 @@
 \alias{fetch_files}
 \title{fetch ScanR result/export files}
 \usage{
-fetch_files(where.from, where.to, object = "Main")
+fetch_files(where.from, where.to, object = "Main", verbose = TRUE)
 }
 \arguments{
 \item{where.from}{directory where all screen data is stored;
@@ -18,6 +18,8 @@ a non-existing one will be created}
 
 \item{object}{regular expression that defines which ParameterData files to copy;
 defaults to Main; set to NULL to skip ParameterData files}
+
+\item{verbose}{logical flag; specifies whether to report progress}
 }
 \description{
 Copy all ScanR result files, chosen parameter data files, and the screen log
@@ -34,8 +36,6 @@ will be copied to the \code{where.to} directory. Hidden files will be omitted.
 Names of scan directories, which are usually plate numbers,
 are added to all respective file names.
 
-If the master directory contains a file with a name matching the regex
-"screenlog", it will also be copied.
-
-Sort the copied files as you wish.
+If the master directory contains files whose names match regular expressions
+"screenlog" and "layout", they will also be copied.
 }
