@@ -24,7 +24,11 @@ Imports:
     ggplot2 (>= 3.1.0),
     lubridate (>= 1.7.4),
     metamethods (>= 0.1.4),
-    reutils (>= 0.2.3)
+    reutils (>= 0.2.3),
+    checkmate,
+    shiny,
+    plotly,
+    readxl
 Suggests: 
     testthat
 Remotes: 
