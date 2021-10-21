@@ -39,17 +39,17 @@
 #'
 #' @export
 #'
-#' @examples
-#' L <- layouts('layout_S14_test.txt',
-#'              'layout_S14_control.txt')
-#' head(L)
-#' table(L$plated, L$well_type, L$plate_type)
-#'
-#' layouts('layout_S14_test.txt',
-#'         'layout_S14_control.txt',
-#'         outfile = 'temp_layout_S14.txt')
-#' head(read.delim('temp_layout_S14.txt'))
-#'
+# #' @examples
+# #' L <- layouts('layout_S14_test.txt',
+# #'              'layout_S14_control.txt')
+# #' head(L)
+# #' table(L$plated, L$well_type, L$plate_type)
+# #'
+# #' layouts('layout_S14_test.txt',
+# #'         'layout_S14_control.txt',
+# #'         outfile = 'temp_layout_S14.txt')
+# #' head(read.delim('temp_layout_S14.txt'))
+
 layouts <- function(..., outfile = NULL) {
   # capture files
   files <- list(...)
@@ -79,7 +79,11 @@ layouts <- function(..., outfile = NULL) {
   # apply processing function over all files
   L <- data.table::rbindlist(lapply(files, process_layout))
 
-  if (is.null(outfile)) return(L) else utils::write.table(L, outfile, quote = FALSE, sep = '\t', row.names = FALSE)
+  if (is.null(outfile)) {
+    return(L)
+  } else {
+    utils::write.table(L, outfile, quote = FALSE, sep = '\t', row.names = FALSE)
+  }
 }
 
 # internal function that will load single file and process it accordingly
@@ -92,12 +96,13 @@ process_layout <- function(x) {
     X$plate_type <- X_name_split[length(X_name_split) - 1]
   }
   # transform to long-form
-  y <- data.table::melt(data.table::as.data.table(X),
+  data.table::setDT(X)
+  y <- data.table::melt(X,
                         measure.vars = grep("[0-9]{8}", names(X)),
                         variable.name = "plated", value.name = "well_type",
                         variable.factor = FALSE, value.factor = FALSE)
   # fix dates
-  if (is.element("plated", names(y))) y[, plated := gsub('^X', '', plated)]
+  if (is.element("plated", names(y))) y$plated <- gsub('^X', '', y$plated)
 
   return(y)
 }

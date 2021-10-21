@@ -12,10 +12,6 @@ quartile(x, subset = TRUE, cFac = 1.7239)
 \item{subset}{logical vector specifying the subset to be included in the calculation;}
 
 \item{cFac}{stringency factor \emph{c}}
-
-\item{variable}{character string specifying the name of variable to compute from}
-
-\item{...}{arguments passed to methods}
 }
 \value{
 Named numeric vector of length 2, giving the calculated cut-off thresholds,

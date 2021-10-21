@@ -12,8 +12,6 @@
 #' @param x numeric vector or a data frame
 #' @param cFac stringency factor \emph{c}
 #' @param subset logical vector specifying the subset to be included in the calculation;
-#' @param variable character string specifying the name of variable to compute from
-#' @param ... arguments passed to methods
 #'
 #' @return Named numeric vector of length 2, giving the calculated cut-off thresholds,
 #'         given the specified \emph{c} factor.
@@ -28,7 +26,7 @@
 
 quartile <- function(x, subset = TRUE, cFac = 1.7239) {
 
-  quantiles <- stas::quantile(x[subset], type = 7)
+  quantiles <- stats::quantile(x[subset], type = 7)
   q1 <- quantiles[2]
   q2 <- quantiles[3]
   q3 <- quantiles[4]

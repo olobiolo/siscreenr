@@ -156,8 +156,8 @@ build_screen <- function(logfile, layout, datadir = './data/', rem.col,
   column.wishlist <- c('plate', 'well', 'position', 'row', 'column',
                        'screen', 'replica', 'plate_type', 'well_type',
                        'prepared', 'plated', 'imaged')
-  column.order <- c(column_wishlist, setdiff(names(scr), column_wishlist))
-  scr <- scr[order(scr$plate, scr$replica, scr$plated, scr$imaged, scr$column, scr$row), column_order]
+  column.order <- c(column.wishlist, setdiff(names(scr), column.wishlist))
+  scr <- scr[order(scr$plate, scr$replica, scr$plated, scr$imaged, scr$column, scr$row), column.order]
 
   if (verbose) cat('\nready! \n')
   invisible(scr)

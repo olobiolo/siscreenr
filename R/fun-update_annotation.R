@@ -269,7 +269,7 @@ check_geneids <- function(geneIDs, verbose, ...) {
   m <- vapply(geneIDs, function(x) check_geneid_status_with_pause(x, verbose, ...), character(4))
   d <- as.data.frame(t(m), stringsAsFactors = FALSE)
   d$withdrawn <- as.logical(d$withdrawn)
-  d[c('replaced', 'new_geneid')] <- do.call(strsplit(d$replaced, sep = 'ID: '))
+  d[c('replaced', 'new_geneid')] <- do.call(strsplit(d$replaced, split = 'ID: '))
   d$replaced <- ifelse(is.na(d$replaced), FALSE, TRUE)
   d$new_geneid <- as.numeric(d$new_geneid)
   return(d)

@@ -48,15 +48,3 @@ the name of which must be the plating date in yyyymmdd format (legal separators 
 
 There should also be a "position" column or "row" and "column" columns but this is optional.
 }
-\examples{
-L <- layouts('layout_S14_test.txt',
-             'layout_S14_control.txt')
-head(L)
-table(L$plated, L$well_type, L$plate_type)
-
-layouts('layout_S14_test.txt',
-        'layout_S14_control.txt',
-        outfile = 'temp_layout_S14.txt')
-head(read.delim('temp_layout_S14.txt'))
-
-}

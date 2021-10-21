@@ -2,7 +2,7 @@
 #'
 #' Assign hit status to single wells in a screen based on their z scores.
 #'
-#' A data point is considered a hit if its hitting variable (usually a z score)
+#' A data point is considered a hit if its hitting variable (e.g. a z score)
 #' exceeds a threshold. A point can have one of three hitscores:
 #' \itemize{
 #'   \item{
@@ -30,7 +30,7 @@ hitscore <- function(x, threshold = 2) {
   if (length(threshold) > 2L) stop("\"threshold\" must be of length 1 or 2")
 
   if (length(threshold) == 1L) {
-    threshold <- c(ithreshold, threshold)
+    threshold <- c(-threshold, threshold)
   }
   x1 <- ifelse(x > threshold[1] & x < threshold[2], 0L, x)
   x2 <- ifelse(x1 <= threshold[1], -1L, x1)

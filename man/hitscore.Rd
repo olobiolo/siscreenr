@@ -20,7 +20,7 @@ a vector of hit statuses represented as integers: 1, -1 or 0
 Assign hit status to single wells in a screen based on their z scores.
 }
 \details{
-A data point is considered a hit if its hitting variable (usually a z score)
+A data point is considered a hit if its hitting variable (e.g. a z score)
 exceeds a threshold. A point can have one of three hitscores:
 \itemize{
   \item{
