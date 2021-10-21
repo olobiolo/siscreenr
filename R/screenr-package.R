@@ -120,27 +120,5 @@
 #
 # 5. MAJOR: rewrite from ggplot to plotly
 #
-
-
-## KNOWN ISSUES
-
-# fix links in docs, e.g. here
+# 7. clean up scan_status
 #
-# fetch_files: add option to ignore ParameterData
-#
-# separate_flag: add support for whole pltae rescanned (all)
-#
-# layouts: fails for files with single layouts
-#
-# build_screen: fails at <crossed out> renaming "wells" column </crossed out>
-#
-# zscore: fix help
-#
-# hitscore: fix typo (treshold)
-#
-# zscore: make sure methods work properly
-#
-# add quratile method for hit scoring
-#   two-tailed threshold in hit_score?
-#   specify scoring column in hit_score - present!
-#   shiny app to test out thresholds?

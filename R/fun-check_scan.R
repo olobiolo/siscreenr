@@ -48,15 +48,17 @@ check_scan <- function(path, output = 'print') {
     for (d in dirs) {
       # list image files
       images <- list.files(path = paste(d, 'data', sep = '/'), pattern = 'tif$')
+      # split image file names
+      images_split <- strsplit(images, '--')
       # isolate well indices
-      indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
+      indices <- vapply(images_split, function(x) x[2], character(1), USE.NAMES = FALSE)
       # isolate well names
-      wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
+      wells <- vapply(images_split, function(x) x[1], character(1), USE.NAMES = FALSE)
       # order wells according to indices
       wells <- wells[order(indices)]
       # convert wells to factor so that they are not sorted by table
       wells <- factor(wells, levels = unique(wells))
-      # get number of ocurrences
+      # get number of occurrences
       freqs <- table(wells)
       # get faulty wells
       faulty <- freqs[freqs != max(freqs)]
@@ -76,8 +78,9 @@ check_scan <- function(path, output = 'print') {
 
     check_one <- function(path) {
       images <- list.files(path = paste(path, 'data', sep = '/'), pattern = 'tif$')
-      indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
-      wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
+      images_split <- strsplit(images, '--')
+      indices <- vapply(images_split, function(x) x[2], character(1), USE.NAMES = FALSE)
+      wells <- vapply(images_split, function(x) x[1], character(1), USE.NAMES = FALSE)
       wells <- wells[order(indices)]
       wells <- factor(wells, levels = unique(wells))
       freqs <- table(wells)
@@ -112,7 +115,6 @@ check_scan <- function(path, output = 'print') {
 
 scan_status <- function(path, output = 'print') {
 
-
   # messages:
   message.noscans <- 'no active scans'
   message.scanactive <- 'scan is running'
@@ -125,10 +127,17 @@ scan_status <- function(path, output = 'print') {
 
   output <- match.arg(arg = output, choices = c('print', 'console', 'return', 'list'))
 
-  # get files names with postfixes
+  # get file names with suffixes
   files <- list.files(path = path, pattern = '_[0-9]{3}$', full.names = TRUE, recursive = FALSE)
   # pick out directories
   dirs <- files[utils::file_test('-d', files)]
+
+  # if no directories found
+  if (length(dirs) == 0) {
+    cat(message.noscans, '\n')
+    if (output == 'return' || output == 'list') return(list())
+  }
+
 
   # function that extracts wells with logged events
   wells.logged <- function(logfile) {
@@ -153,15 +162,13 @@ scan_status <- function(path, output = 'print') {
 
   # do the thing
   if (output == 'print' || output == 'console') {
-    if (length(dirs) == 0) {
-      cat(message.noscans, '\n')
-    }
+
     for (d in dirs) {
-      # check aquisition log to see if scan has finished
+      # check acquisition log to see if scan has finished
       aclog <- utils::read.delim(paste(d, 'AcquisitionLog.dat', sep = '/'), skip = 1)
       # print scan name and status
       cat(basename(d), ':', '\t', sep = '')
-      if (aclog[nrow(aclog), 1] == 'ENDACQUISITION'){
+      if (aclog[nrow(aclog), 1] == 'ENDACQUISITION') {
         cat(message.scanfinished, '\n')
       } else {
         cat(message.scanactive, '\n')
@@ -176,7 +183,7 @@ scan_status <- function(path, output = 'print') {
       wells <- wells[order(indices)]
       # convert wells to factor so that they are not sorted by table
       wells <- factor(wells, levels = unique(wells))
-      # get number of ocurrences
+      # get number of occurrences
       freqs <- table(wells)
       # get faulty wells
       faulty <- freqs[freqs != max(freqs)]
@@ -185,17 +192,13 @@ scan_status <- function(path, output = 'print') {
       # combine
       badwells <- unique(c(names(faulty), eventful))
       # print scan completeness
-      if (length(badwells) != 0) {
+      if (length(badwells) > 0) {
         cat(message.issues, ': ', '\t', paste(badwells, collapse = ', '), '\n\n', sep ='')
       } else {
         cat(message.noissues, '\n\n')
       }
     }
   } else if (output == 'return' || output == 'list') {
-    if (length(dirs) == 0) {
-      cat(message.noscans, '\n')
-      return(list())
-    }
 
   check_one <- function(path) {
       images <- list.files(path = paste(path, 'data', sep = '/'), pattern = 'tif$')
@@ -208,8 +211,11 @@ scan_status <- function(path, output = 'print') {
       aclog <- utils::read.delim(paste(path, 'AcquisitionLog.dat', sep = '/'), skip = 1)
       eventful <- wells.logged(aclog)
       badwells <- c(names(faulty), eventful)
+      scan.status <- if (aclog[nrow(aclog), 1] == 'ENDACQUISITION') message.scanfinished else message.scanactive
+      scan.status <- paste(basename(path), ": ", scan.status, sep = "")
+      attr(badwells, 'scan.status') <- scan.status
       if (length(badwells) > 0) {
-        return(paste(badwells, collapse = ', '))
+        return(paste(message.issues, paste(badwells, collapse = ', ')), sep = ": ")
       } else {
         return(message.noissues)
       }
@@ -222,3 +228,18 @@ scan_status <- function(path, output = 'print') {
     stop('invalid \"output\" parameter')
   }
 }
+
+# TODO
+# use check_one in all cases
+#
+# badwells <- lapply(dirs, ckech_one)
+# names(badwells) <- basename(dirs)
+# meth <- switch(output,
+#                'return' = , 'list' = return(badwells),
+#                'print' = , 'console' = {
+#                  for (i in seq_along(badwells)) {
+#                    cat(attr(badwells[[i]], 'scan.status'), '\n')
+#                    cat(badwells[[i]], '\n')
+#                  }
+#                },
+#                stop('invalid \"output\" parameter'))
