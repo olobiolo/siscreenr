@@ -112,35 +112,8 @@
 "_PACKAGE"
 
 # TODO
-# 1. shiny app for interactive results exploration
-#   scatter plot with tooltips, zoom, more...
-# 3. shiny app for scan error exploration to facilitate remote rescanning?
-#    idk, the text version seems to be doing well right now...
-# 4. shiny app for choosing z score threshold - this shouldn't be hard...
 #
 # 5. MAJOR: rewrite from ggplot to plotly
 #
-
-
-## KNOWN ISSUES
-
-# fix links in docs, e.g. here
+# 7. clean up scan_status
 #
-# fetch_files: add option to ignore ParameterData
-#
-# separate_flag: add support for whole pltae rescanned (all)
-#
-# layouts: fails for files with single layouts
-#
-# build_screen: fails at <crossed out> renaming "wells" column </crossed out>
-#
-# zscore: fix help
-#
-# hitscore: fix typo (treshold)
-#
-# zscore: make sure methods work properly
-#
-# add quratile method for hit scoring
-#   two-tailed threshold in hit_score?
-#   specify scoring column in hit_score - present!
-#   shiny app to test out thresholds?
