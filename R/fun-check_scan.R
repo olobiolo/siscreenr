@@ -113,7 +113,125 @@ check_scan <- function(path, output = 'print') {
 #' \code{scan_status} is a work in progress. Some errors may escape notice.
 #' Due to ScanR log formats the reported events may be assigned to a neighboring well.
 
-scan_status <- function(path, output = 'print') {
+# scan_status <- function(path, output = c('print', 'return')) {
+#
+#   # messages:
+#   message.noscans <- 'no active scans'
+#   message.scanactive <- 'scan is running'
+#   message.scanfinished <- 'scan has finished' # scan complete
+#   message.noissues <- 'scan complete' # scan complete
+#   message.issues <- 'issues in well(s)' # missing images in well(s)
+#
+#
+#   if (!dir.exists(path)) stop('no such directory')
+#
+#   output <- match.arg(arg = output)
+#
+#   # get file names with suffixes
+#   files <- list.files(path = path, pattern = '_[0-9]{3}$', full.names = TRUE, recursive = FALSE)
+#   # pick out directories
+#   dirs <- files[utils::file_test('-d', files)]
+#
+#   # if no directories found
+#   if (length(dirs) == 0) {
+#     cat(message.noscans, '\n')
+#     if (output == 'return' || output == 'list') return(list())
+#   }
+#
+#
+#   # function that extracts wells with logged events
+#   wells.logged <- function(logfile) {
+#     # does log contain events
+#     events <- !identical(levels(logfile[ ,1]), c('ENDACQUISITION', 'IMAGEPOS'))
+#     if (events) {
+#       # these are the rows with events
+#       #logfile[which(logfile[, 1] == 'LOG'), ]
+#       # next row after event
+#       wells <- logfile[which(logfile[, 1] == 'LOG') +2, 2]
+#       wells <- sort(as.numeric(sub('^W=', '', wells)))
+#       # translate well numbers to positions
+#       row <- function(w) LETTERS[(w - 1) %/% 24 + 1]
+#       col <- function(w) (w - 1) %% 24 + 1
+#       positions <- paste0(row(wells), col(wells))
+#
+#       return(unique(positions))
+#     } else {
+#       return(NULL)
+#     }
+#   }
+#
+#   # do the thing
+#   if (output == 'print') {
+#
+#     for (d in dirs) {
+#       # check acquisition log to see if scan has finished
+#       aclog <- utils::read.delim(paste(d, 'AcquisitionLog.dat', sep = '/'), skip = 1)
+#       # print scan name and status
+#       cat(basename(d), ':', '\t', sep = '')
+#       if (aclog[nrow(aclog), 1] == 'ENDACQUISITION') {
+#         cat(message.scanfinished, '\n')
+#       } else {
+#         cat(message.scanactive, '\n')
+#       }
+#       # list image files
+#       images <- list.files(path = paste(d, 'data', sep = '/'), pattern = 'tif$')
+#       # isolate well indices
+#       indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
+#       # isolate well names
+#       wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
+#       # order wells according to indices
+#       wells <- wells[order(indices)]
+#       # convert wells to factor so that they are not sorted by table
+#       wells <- factor(wells, levels = unique(wells))
+#       # get number of occurrences
+#       freqs <- table(wells)
+#       # get faulty wells
+#       faulty <- freqs[freqs != max(freqs)]
+#       # get eventful wells
+#       eventful <- wells.logged(aclog)
+#       # combine
+#       badwells <- unique(c(names(faulty), eventful))
+#       # print scan completeness
+#       if (length(badwells) > 0) {
+#         cat(message.issues, ': ', '\t', paste(badwells, collapse = ', '), '\n\n', sep ='')
+#       } else {
+#         cat(message.noissues, '\n\n')
+#       }
+#     }
+#   } else if (output == 'return') {
+#
+#   check_one <- function(path) {
+#       images <- list.files(path = paste(path, 'data', sep = '/'), pattern = 'tif$')
+#       indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
+#       wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
+#       wells <- wells[order(indices)]
+#       wells <- factor(wells, levels = unique(wells))
+#       freqs <- table(wells)
+#       faulty <- freqs[freqs != max(freqs)]
+#       aclog <- utils::read.delim(paste(path, 'AcquisitionLog.dat', sep = '/'), skip = 1)
+#       eventful <- wells.logged(aclog)
+#       badwells <- c(names(faulty), eventful)
+#       scan.status <- if (aclog[nrow(aclog), 1] == 'ENDACQUISITION') message.scanfinished else message.scanactive
+#       scan.status <- paste(basename(path), ": ", scan.status, sep = "")
+#       attr(badwells, 'scan.status') <- scan.status
+#       if (length(badwells) > 0) {
+#         return(paste(message.issues, paste(badwells, collapse = ', ')), sep = ": ")
+#       } else {
+#         return(message.noissues)
+#       }
+#     }
+#
+#     ans <- lapply(dirs, check_one)
+#     names(ans) <- basename(dirs)
+#     return(ans)
+#   } else {
+#     stop('invalid \"output\" parameter')
+#   }
+# }
+
+
+
+scan_status <- function(path, output = c('print', 'return')) {
 
   # messages:
   message.noscans <- 'no active scans'
@@ -125,7 +243,7 @@ scan_status <- function(path, output = 'print') {
 
   if (!dir.exists(path)) stop('no such directory')
 
-  output <- match.arg(arg = output, choices = c('print', 'console', 'return', 'list'))
+  output <- match.arg(arg = output)
 
   # get file names with suffixes
   files <- list.files(path = path, pattern = '_[0-9]{3}$', full.names = TRUE, recursive = FALSE)
@@ -139,100 +257,24 @@ scan_status <- function(path, output = 'print') {
   }
 
 
-  # function that extracts wells with logged events
-  wells.logged <- function(logfile) {
-    # does log contain events
-    events <- !identical(levels(logfile[ ,1]), c('ENDACQUISITION', 'IMAGEPOS'))
-    if (events) {
-      # these are the rows with events
-      #logfile[which(logfile[, 1] == 'LOG'), ]
-      # next row after event
-      wells <- logfile[which(logfile[, 1] == 'LOG') +2, 2]
-      wells <- sort(as.numeric(sub('^W=', '', wells)))
-      # translate well numbers to positions
-      row <- function(w) LETTERS[(w - 1) %/% 24 + 1]
-      col <- function(w) (w - 1) %% 24 + 1
-      positions <- paste0(row(wells), col(wells))
+  badwells <- vapply(dirs, check_one, character(1), USE.NAMES = TRUE, SIMPLIFY = FALSE)
 
-      return(unique(positions))
-    } else {
-      return(NULL)
-    }
-  }
+  browser()
+  meth <- switch(output,
+                 'return' = return(badwells),
+                 'print' = {
+                   for (i in seq_along(badwells)) {
+                     cat()
+                   }
+                 })
 
-  # do the thing
-  if (output == 'print' || output == 'console') {
 
-    for (d in dirs) {
-      # check acquisition log to see if scan has finished
-      aclog <- utils::read.delim(paste(d, 'AcquisitionLog.dat', sep = '/'), skip = 1)
-      # print scan name and status
-      cat(basename(d), ':', '\t', sep = '')
-      if (aclog[nrow(aclog), 1] == 'ENDACQUISITION') {
-        cat(message.scanfinished, '\n')
-      } else {
-        cat(message.scanactive, '\n')
-      }
-      # list image files
-      images <- list.files(path = paste(d, 'data', sep = '/'), pattern = 'tif$')
-      # isolate well indices
-      indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
-      # isolate well names
-      wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
-      # order wells according to indices
-      wells <- wells[order(indices)]
-      # convert wells to factor so that they are not sorted by table
-      wells <- factor(wells, levels = unique(wells))
-      # get number of occurrences
-      freqs <- table(wells)
-      # get faulty wells
-      faulty <- freqs[freqs != max(freqs)]
-      # get eventful wells
-      eventful <- wells.logged(aclog)
-      # combine
-      badwells <- unique(c(names(faulty), eventful))
-      # print scan completeness
-      if (length(badwells) > 0) {
-        cat(message.issues, ': ', '\t', paste(badwells, collapse = ', '), '\n\n', sep ='')
-      } else {
-        cat(message.noissues, '\n\n')
-      }
-    }
-  } else if (output == 'return' || output == 'list') {
-
-  check_one <- function(path) {
-      images <- list.files(path = paste(path, 'data', sep = '/'), pattern = 'tif$')
-      indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
-      wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
-      wells <- wells[order(indices)]
-      wells <- factor(wells, levels = unique(wells))
-      freqs <- table(wells)
-      faulty <- freqs[freqs != max(freqs)]
-      aclog <- utils::read.delim(paste(path, 'AcquisitionLog.dat', sep = '/'), skip = 1)
-      eventful <- wells.logged(aclog)
-      badwells <- c(names(faulty), eventful)
-      scan.status <- if (aclog[nrow(aclog), 1] == 'ENDACQUISITION') message.scanfinished else message.scanactive
-      scan.status <- paste(basename(path), ": ", scan.status, sep = "")
-      attr(badwells, 'scan.status') <- scan.status
-      if (length(badwells) > 0) {
-        return(paste(message.issues, paste(badwells, collapse = ', ')), sep = ": ")
-      } else {
-        return(message.noissues)
-      }
-    }
-
-    ans <- lapply(dirs, check_one)
-    names(ans) <- basename(dirs)
-    return(ans)
-  } else {
-    stop('invalid \"output\" parameter')
-  }
 }
 
 # TODO
 # use check_one in all cases
 #
-# badwells <- lapply(dirs, ckech_one)
+# badwells <- lapply(dirs, check_one)
 # names(badwells) <- basename(dirs)
 # meth <- switch(output,
 #                'return' = , 'list' = return(badwells),
@@ -243,3 +285,49 @@ scan_status <- function(path, output = 'print') {
 #                  }
 #                },
 #                stop('invalid \"output\" parameter'))
+
+
+# function for checking one scan directory
+check_one <- function(path) {
+  images <- list.files(path = paste(path, 'data', sep = '/'), pattern = 'tif$')
+  indices <- vapply(strsplit(images, '--'), function(x) x[2], character(1), USE.NAMES = FALSE)
+  wells <- vapply(strsplit(images, '--'), function(x) x[1], character(1), USE.NAMES = FALSE)
+  wells <- wells[order(indices)]
+  wells <- factor(wells, levels = unique(wells))
+  freqs <- table(wells)
+  faulty <- freqs[freqs != max(freqs)]
+  aclog <- utils::read.delim(paste(path, 'AcquisitionLog.dat', sep = '/'), skip = 1)
+  eventful <- wells.logged(aclog)
+  badwells <- c(names(faulty), eventful)
+  scan.status <- if (aclog[nrow(aclog), 1] == 'ENDACQUISITION') message.scanfinished else message.scanactive
+  scan.status <- paste(basename(path), ": ", scan.status, sep = "")
+  attr(badwells, 'scan.status') <- scan.status
+  if (length(badwells) > 0) {
+    return(paste(message.issues, paste(badwells, collapse = ', ')), sep = ": ")
+  } else {
+    return(message.noissues)
+  }
+}
+
+
+
+# function that extracts wells with logged events
+wells.logged <- function(logfile) {
+  # does log contain events
+  events <- !identical(levels(logfile[ ,1]), c('ENDACQUISITION', 'IMAGEPOS'))
+  if (events) {
+    # these are the rows with events
+    #logfile[which(logfile[, 1] == 'LOG'), ]
+    # next row after event
+    wells <- logfile[which(logfile[, 1] == 'LOG') +2, 2]
+    wells <- sort(as.numeric(sub('^W=', '', wells)))
+    # translate well numbers to positions
+    row <- function(w) LETTERS[(w - 1) %/% 24 + 1]
+    col <- function(w) (w - 1) %% 24 + 1
+    positions <- paste0(row(wells), col(wells))
+
+    return(unique(positions))
+  } else {
+    return(NULL)
+  }
+}
