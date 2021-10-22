@@ -107,13 +107,3 @@
 #'
 #' @keywords internal
 "_PACKAGE"
-
-# TODO
-#
-# MAJOR: rewrite from ggplot to plotly
-#
-# MINOR:
-# normalize:
-#   reorder columns to maintain previous
-#   reorder rows to maintain previous
-#   warn/terminate if medpolish detects that vector too long
