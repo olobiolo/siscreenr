@@ -9,10 +9,11 @@ attach_annotation(scr, ann)
 \arguments{
 \item{scr}{a \code{data.frame} containing the screen object}
 
-\item{ann}{path to library annotation file}
+\item{ann}{path to library annotation file;
+if missing, defaults to internally stored annotation}
 }
 \value{
-a \code{data.table}
+A \code{data.table}.
 }
 \description{
 Merge library annotation with screen object.
@@ -22,3 +23,10 @@ The library annotation is merged with the screen object,
 dropping all plates not present in the screen.
 Missing gene symbols are substituted with their respective well types.
 }
+\section{Mismatching annotation}{
+
+If the built-in annotation cannot be merged with the screen object,
+an error will be thrown and the annotation will be assigned in the
+Global Environment. It can then be modified and saved in a different file.
+}
+
