@@ -69,8 +69,8 @@ separate_flag <- function(scr, flag = 'wells_rescanned', newname,
   # compare the two
   C <- mapply(is.element, A, B)
   # recognize when the whole plate has been affected
-  D <- ifelse(B[[flag]] == "all", TRUE, C)
-  D <- ifelse(grepl("whole plate", B[[flag]]), TRUE, D)
+  D <- ifelse(scr[[flag]] == "all", TRUE, C)
+  D <- ifelse(grepl("whole plate", scr[[flag]]), TRUE, D)
   # replace original column in scr
   scr[[flag]] <- D
 
