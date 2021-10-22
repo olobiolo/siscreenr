@@ -112,11 +112,6 @@
 "_PACKAGE"
 
 # TODO
-# 1. shiny app for interactive results exploration
-#   scatter plot with tooltips, zoom, more...
-# 3. shiny app for scan error exploration to facilitate remote rescanning?
-#    idk, the text version seems to be doing well right now...
-# 4. shiny app for choosing z score threshold - this shouldn't be hard...
 #
 # 5. MAJOR: rewrite from ggplot to plotly
 #
