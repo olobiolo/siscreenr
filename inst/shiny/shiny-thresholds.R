@@ -8,7 +8,8 @@ ui <- fluidPage(
 
   fileInput("file", "upload screen file", accept = ".rds, .txt, .csv, .xls, .xlsx",
             placeholder = "rds, txt, csv or Excel files"),
-  uiOutput("select_variables"),
+  uiOutput("well_type_variable"),
+  uiOutput("well_type_values"),
   NULL)
 
 server <- function(input, output, session) {
@@ -125,7 +126,7 @@ server <- function(input, output, session) {
     data[, eval(varss) := lapply(.SD, hitscore, threshold = threshold), .SDcols = vars]
     # apply stringency
     dataFlagged <-
-      data[, flag_hits(.SD, vars = ..varss, stringency = ..STRINGENCY),
+      data[, flag_hits(.SD, vars = ..varss, stringency = ..stringency),
            by = c("plate", "well")]
 
     # rearrange rows and columns
@@ -135,10 +136,35 @@ server <- function(input, output, session) {
     return(dataFlagged)
   })
 
+  output[["well_type_variable"]] <- renderUI({
+    data <- req(currentData())
+    factors <- names(Filter(is.character | is.factor, data))
+    selectizeInput("varWellType", "select variable that encodes well types",
+                   choices = c("", factors))
+  })
+  output[["well_type_values"]] <- renderUI({
+    data <- req(currentData())
+    var <- req(input[["well_type_variable"]])
+    vals <- unique(data[[var]])
+    selectizeInput("varWellType", "select variable that encodes well types",
+                   choices = c("", vals), multiple = TRUE)
+  })
+
+
   output[["hit_histogram"]] <- plotly::renderPlotly({
     data <- validate(need(scoredData(), "flag hits"))
 
+    data <- data[data$plate_type == "test"]
+    vars <- req(input[["hitscore_variable"]])
+    grp  <- req(input[["stringency_grouping"]])
+
+    stringency <- req(input[["hit_stringency"]])
+    suffix <- if (stringency >= 1) "sum" else "frac"
+    varScore <- paste(vars, suffix, sep = "_")
+
     # function that will build the plot
+    plotHits(data, varScore = varScore, varGrp = grp)
+
 
   })
 
