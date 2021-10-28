@@ -8,6 +8,7 @@ ui <- fluidPage(
 
   fileInput("file", "upload screen file", accept = ".rds, .txt, .csv, .xls, .xlsx",
             placeholder = "rds, txt, csv or Excel files"),
+  uiOutput("select_variable"),
   uiOutput("well_type_variable"),
   uiOutput("well_type_values"),
   NULL)
@@ -25,12 +26,12 @@ server <- function(input, output, session) {
                    "xls" = readxl::read_xls,
                    "xlsx" = readxl::read_xlsx,
                    function(x) validate(need(FALSE, "wrong file format")))
-    file_content <- method(filePath())
+    file_content <- meth(filePath())
 
     ## add some validation actions
 
     # convert to data table
-    file_content <- data.table::as.ata.table(file_content)
+    file_content <- data.table::as.Data.table(file_content)
 
     return(file_content)
   })
@@ -174,18 +175,18 @@ server <- function(input, output, session) {
 
 
   # load cleaned data
-  # allow normalization: select variables, choose method and grouping
-  # allow add zscores: select variables and apply button
-  # select variable to select hits by
+  # select ONE variable
+  # allow normalization: choose method and grouping
+  # allow add zscores: apply button
   # selector for thresholds
   # selector for stringency if replicates
   # RECALCULATE button
   # calculation (eventReactive)
     # hitscore(variable, thresholds)
     # flag_hits(variables, stringency)
-  # barplot with hit numbers vs well type; stacked bars with hit strength; negative hits go below axis
+  # barplot with hit numbers vs hit tiers, colored by well type
     #
-  # table with hit numbers vs well type
+  # table with hit numbers vs hit tiers sparated by well type
 
 
 }

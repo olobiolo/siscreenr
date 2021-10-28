@@ -29,7 +29,7 @@ server <- function(input, output, session) {
                    "xls" = readxl::read_xls,
                    "xlsx" = readxl::read_xlsx,
                    function(x) validate(need(FALSE, "wrong file format")))
-    file_content <- method(filePath())
+    file_content <- meth(filePath())
 
     ## add some validation actions
 
@@ -53,7 +53,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # # select values of highlight variable to assigne different color to
+  # # select values of highlight variable to assign different color to
   # # then easy to add text as well
   # # this would be one color
   # #     maybe easy to build palette with colourpicker::colourPicker with numCols = length(input[["valCol"]])
