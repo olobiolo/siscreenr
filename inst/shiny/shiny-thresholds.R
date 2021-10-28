@@ -191,27 +191,3 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
-
-
-plotHits <- function(x, varHit, varCol, varGrp) {
-
-  if (!checkmate::test_data_table(x)) x <- data.table::as.data.table(x)
-  checkmate::assert_string(varHit)
-  checkmate::assert_string(varCol)
-  checkmate::assert_character(varGrp)
-  lapply(c(varHit, varCol, varGrp),
-         function(v) checkmate::assert_choice(v, names(x)))
-
-
-  # varHit is selected
-  # varCol is well_type
-  # varGrp are vars over which flag_hit was called
-
-  # keep necessary information
-  vars <- c(varHit, varCol, varGrp)
-  xx <- unique(x[, vars])
-
-  xx[]
-
-
-}
