@@ -52,9 +52,8 @@ plotExplore <- function(x, varX, varY, varCol, color = "lightyellow") {
   return(plotHighlight)
 
 }
-# ss <- sample(a$gene_symbol, 10)
 # a %>% dplyr::sample_frac(0.2) %>% dplyr::filter(well_type == "sample") %>%
-#   plotExplore(., varX = 'nuclei', varY = 'total_intensity_BrdU_in_BrdU', varCol = "gene_symbol", valCol = ss)
+#   plotExplore(., varX = 'nuclei', varY = 'total_intensity_BrdU_in_BrdU', varCol = "gene_symbol")
 
 
 
