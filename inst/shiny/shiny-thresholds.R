@@ -8,9 +8,14 @@ ui <- fluidPage(
 
   fileInput("file", "upload screen file", accept = ".rds, .txt, .csv, .xls, .xlsx",
             placeholder = "rds, txt, csv or Excel files"),
-  uiOutput("select_variable"),
-  uiOutput("well_type_variable"),
-  uiOutput("well_type_values"),
+  uiOutput("select_variable"),    # this is the variable that will be analyzed
+                                  # transformation: method
+                                  # normalization: method and reference
+                                  # zscore: robust, deviation and reference
+                                  # thresholds: either numericInput or sliderInput (based on range); small histogram
+                                  # stringency: either numericInput or sliderInput (based on number of replicates)
+  uiOutput("well_type_variable"), # this variable encodes well types
+  uiOutput("well_type_values"),   # these well types will be included in barplot
   NULL)
 
 server <- function(input, output, session) {
@@ -52,7 +57,7 @@ server <- function(input, output, session) {
   # transform data on request
   observeEvent(input[["transform"]], { # create button (drop-in?)
     data <- currentData()
-    vars <- req(input[["transformation_variables"]]) # create input
+    vars <- req(input[["select_variable"]])
     meth <- req(input[["transformation_method"]])    # create input (log, log2, log10)
 
     # prepare names for added columns
@@ -60,7 +65,7 @@ server <- function(input, output, session) {
     # get the chosen transformation function
     meth <- get(meth)
     # modify data by reference
-    data[, eval(varss, .SD) := lapply(.SD, meth), .SDcols = ..vars]
+    data[, eval(varss, .SD) := meth(..vars)]
 
     currentData(data)
   })
@@ -68,12 +73,16 @@ server <- function(input, output, session) {
   # normalize data on request
   observeEvent(input[["normalize"]], { # create button (drop-in?)
     data <- req(currentData())
-    vars <- req(input[["normalization_variables"]]) # create input
     meth <- req(input[["normalization_method"]])    # create input
     meth <- get(meth)
     ref  <- req(input[["normalization_reference"]]) # create input
     grp  <- req(input[["normalization_grouping"]])  # create_input
 
+    # get/construct variable name
+    vars <- req(input[["select_variable"]])
+    vars <- paste(vars,
+                  input[["transformation_method"]],
+                  sep = "_")
     # order column-first just in case
     data.table::setorderv(data, c("plate", "replica", "column", "row"))
     # perform normalization
@@ -87,8 +96,13 @@ server <- function(input, output, session) {
     rob  <- req(input[["zscore_robust"]])     # create input (logical flag)
     dev  <- req(input[["zscore_deviations"]]) # create input (logical flag)
     ref  <- req(input[["zscore_reference"]])  # create input (logical predicate...)
-    vars <- req(input[["zscore_variables"]])  # create input (selectize from numerics)
     grp  <- req(input[["zscore_grouping"]])   # create_input (selectize from non-unique factors)
+
+    vars <- req(input[["select_variable"]])
+    vars <- paste(vars,
+                  input[["transformation_method"]],
+                  "normalized", input[["normalization_method"]],
+                  sep = "_")
 
     # perform standardization
     zscored <-
@@ -98,12 +112,6 @@ server <- function(input, output, session) {
     currentData(zscored)
   })
 
-  hit_variable <- renderUI({
-    data <- req(currentData())
-    numerics <- names(Filter(is.numeric, data))
-    selectInput("hitscore_variable", "select variable to score",
-                choices = c("", numerics), multiple = FALSE)
-  })
   hitThreshold <- renderUI({
 
   })
@@ -117,17 +125,23 @@ server <- function(input, output, session) {
     data <- req(currentData())
     threshold <- req(input[["threshold_hit"]])   # create input
     stringency <- req(input[["hit_stringency"]]) # create input
-    vars <- req(input[["hitscore_variable"]])    # selectize from numerics
     grp  <- req(input[["stringency_grouping"]])  # create input (selectize from non-unique factors)
+
+    # getconstruc variable name
+    vars <- req(input[["select_variable"]])
+    vars <- paste(vars,
+                  input[["transformation_method"]],
+                  "normalized", input[["normalization_method"]],
+                  "zscore",
+                  sep = "_")
     # prepare names for hitscore columns
     varss <- paste(vars, "hitscore", sep = "_")
     # prepare names for hit flag columns
-    varsss <- paste(varss, "hit", sep = "_")
     # score hits
-    data[, eval(varss) := lapply(.SD, hitscore, threshold = threshold), .SDcols = vars]
+    data[, eval(varss) := hitscore(eval(as.name(vars), .SD), threshold = threshold)]
     # apply stringency
     dataFlagged <-
-      data[, flag_hits(.SD, vars = ..varss, stringency = ..stringency),
+      data[, flag_hits(.SD, vars = ..varss, stringency = ..STRINGENCY),
            by = c("plate", "well")]
 
     # rearrange rows and columns
@@ -174,18 +188,20 @@ server <- function(input, output, session) {
   }))
 
 
-  # load cleaned data
-  # select ONE variable
-  # allow normalization: choose method and grouping
-  # allow add zscores: apply button
-  # selector for thresholds
-  # selector for stringency if replicates
+  # load cleaned data DONE
+  # select ONE variable TODO
+  # allow transformation: choose method do UI
+  # allow normalization: choose method and grouping do UI
+  # allow add zscores: choose options; apply button do UI
+  # selector for thresholds TODO
+  # selector for stringency if replicates TODO
+  #   need selector of column that stores replicates
   # RECALCULATE button
   # calculation (eventReactive)
     # hitscore(variable, thresholds)
     # flag_hits(variables, stringency)
   # barplot with hit numbers vs hit tiers, colored by well type
-    #
+    # needs selector for well type variables (and values) DONE
   # table with hit numbers vs hit tiers sparated by well type
 
 
