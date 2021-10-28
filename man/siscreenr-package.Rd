@@ -34,6 +34,9 @@ Data analysis:
   \item{
   \code{hitscore} classify data point as hit or not based on a given threshold; usually used on z scores
   }
+  \item{
+  \code{flag_hits} calculate aggregate hit score and assign hit status to data points
+  }
 }
 
 Data formatting:

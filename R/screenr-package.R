@@ -30,12 +30,9 @@
 #'   \item{
 #'   \code{hitscore} classify data point as hit or not based on a given threshold; usually used on z scores
 #'   }
-#   \item{
-#   \code{sumscore} calculate summary hit score and assign hit status to data point
-#   }
-#   \item{
-#   \code{fracscore} calculate fractional hit score and assign hit status to data point
-#   }
+#'   \item{
+#'   \code{flag_hits} calculate aggregate hit score and assign hit status to data points
+#'   }
 #' }
 #'
 #' Data formatting:
@@ -113,7 +110,10 @@
 
 # TODO
 #
-# 5. MAJOR: rewrite from ggplot to plotly
+# MAJOR: rewrite from ggplot to plotly
 #
-# 7. clean up scan_status
-#
+# MINOR:
+# normalize:
+#   reorder columns to maintain previous
+#   reorder rows to maintain previous
+#   warn/terminate if medpolish detects that vector too long
