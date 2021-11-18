@@ -94,9 +94,14 @@ zscore.data.frame <- function(x, robust = TRUE, deviations = FALSE, reference, v
   }
   # get reference as logical vector
   if (!missing(reference)) {
-    r <- substitute(reference)
-    r <- if (is.call(r) | is.name(r)) r else if (is.character(r)) substitute(eval(parse(text = r)))
-    Reference <- eval(r, x)
+    if (is.character(reference)) {
+      # character string is parsed and evaluated within x
+      Reference <- eval(parse(text = reference), x)
+    } else {
+      # logical vector is taken as is
+      # call (bare predicate) is taken as is (R 4.0+? TODO: check this)
+      Reference <- reference
+    }
   } else Reference <- logical(nrow(x))
   # get arguments from original call
   arguments <- list(robust = robust, deviations = deviations)
