@@ -66,12 +66,14 @@ normalize.data.frame <- function(x, variables, method = c('median', 'mean', 'med
     message('running median polish, "reference" will be ignored')
   if (method != 'medpolish') {
     if (!missing(reference)) {
-      # capture reference definition
-      r <- substitute(reference)
-      r <- if (is.call(r)) r else substitute(eval(parse(text = r)))
-
-      # evaluate it within x to get a logical vector of reference observations
-      Reference <- with(x, eval(r))
+      if (is.character(reference)) {
+        # character string is parsed and evaluated within x
+        Reference <- eval(parse(text = reference), x)
+      } else {
+        # logical vector is taken as is
+        # call (bare predicate) is taken as is (R 4.0+? TODO: check this)
+        Reference <- reference
+      }
     } else {
       message('no reference; data will be normalized to the whole of the population')
       Reference <- TRUE
@@ -80,21 +82,21 @@ normalize.data.frame <- function(x, variables, method = c('median', 'mean', 'med
 
   # define normalization methods
   meth.mean <- function(x) {
-    R <- mean(x[Reference], na.rm = T)
+    R <- mean(x[Reference], na.rm = TRUE)
     x - R
   }
   meth.median <- function(x) {
-    R <- stats::median(x[Reference], na.rm = T)
+    R <- stats::median(x[Reference], na.rm = TRUE)
     x - R
   }
   meth.medpolish <- function(x) {
     if (any(is.infinite(x)))
-      stop('infinite values will derail the running median procedure', call. = F)
+      stop('infinite values will derail the running median procedure', call. = FALSE)
     X <- get('x', parent.frame(2))
     nr <- length(unique(as.character(X$row)))
     nc <- length(unique(as.character(X$column)))
     x_mat <- matrix(x, nrow = nr, ncol = nc)
-    polished <- stats::medpolish(x_mat, trace.iter = F, na.rm = T)
+    polished <- stats::medpolish(x_mat, trace.iter = FALSE, na.rm = TRUE)
     return(as.vector(polished$residuals))
   }
 
