@@ -21,6 +21,9 @@
 #'   \code{build_screen} collate all data into a single data frame, rearrange and add layout
 #'   }
 #'   \item{
+#'   \code{mask_values} set selected values to NA so that they are omitted from the analysis
+#'   }
+#'   \item{
 #'   \code{normalize} normalize data by one of the available methods:
 #'   subtract mean/median of reference or Tukey's median polish (for matrices)
 #'   }
