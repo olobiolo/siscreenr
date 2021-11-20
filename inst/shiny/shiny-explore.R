@@ -43,7 +43,7 @@ server <- function(input, output, session) {
     numerics <- names(Filter(is.numeric, scr))
     # factors <- setdiff(names(scr), numerics)
     # include only factors with more than 1 value
-    factors <- names(Filter(function(x) length(unique(x)) > 1L, scr[factors]))
+    factors <- uniques(scr)
 
     tagList(
       selectInput("varX", "X axis", choices = c("", numerics)),
