@@ -29,7 +29,7 @@ plotExplore <- function(data, varX, varY, varCol, color = "lightyellow") {
   checkmate::assert_string(color)
 
   # drop data.table class
-  if (inherits(data, "data.table")) x <- as.data.frame(x)
+  if (inherits(data, "data.table")) data <- as.data.frame(data)
 
   # build base label
   data[["hoverlabel"]] <- sprintf("%s: %.2g \n%s: %.2g",
@@ -112,7 +112,7 @@ plotHits <- function(data, varScore, varCol = "well_type", varGrp = c("plate", "
   freq <- match.arg(freq)
 
   # drop data.table class
-  if (inherits(data, "data.table")) x <- as.data.frame(x)
+  if (inherits(data, "data.table")) data <- as.data.frame(data)
 
   # drop unnecessary information
   vars <- c(varGrp, varCol, varScore)
@@ -190,7 +190,7 @@ plotPlate <- function(data, varZ, varX = "column", varY = "row") {
          function(x) checkmate::assert_choice(x, names(data)))
 
   # drop data.table class
-  if (inherits(data, "data.table")) x <- as.data.frame(x)
+  if (inherits(data, "data.table")) data <- as.data.frame(data)
 
   # convert axis variables to factors
   data[[varX]] <- as.factor(data[[varX]])
