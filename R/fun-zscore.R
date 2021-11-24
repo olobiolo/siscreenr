@@ -92,15 +92,17 @@ zscore.data.frame <- function(x, robust = TRUE, deviations = FALSE, reference, v
     if (!all(variables %in% names(x))) stop('invalid variables selected')
     if (!all(vapply(x[variables], is.numeric, logical(1)))) stop('non-numeric variables selected')
   }
-# browser()
   # get reference as logical vector
   if (!missing(reference)) {
+    reference <- substitute(reference)
     if (is.character(reference)) {
       # character string is parsed and evaluated within x
       Reference <- eval(parse(text = reference), x)
-    } else {
+    } else if (is.call(reference)) {
+      # call is evaluated within x
+      Reference <- eval(reference, x)
+    } else if (is.logical(reference)) {
       # logical vector is taken as is
-      # call (bare predicate) is taken as is (R 4.0+? TODO: check this
       Reference <- reference
     }
   } else Reference <- logical(nrow(x))

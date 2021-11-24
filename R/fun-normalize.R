@@ -49,7 +49,9 @@ normalize <- function(x, variables, method = c('median', 'mean', 'medpolish'), r
 #' establishes normalization method, with possible \code{reference},
 #' and runs it on desired variables with \code{lapply},
 #' then \code{cbind}s the result to \code{x}
-normalize.data.frame <- function(x, variables, method = c('median', 'mean', 'medpolish'),
+normalize.data.frame <- function(x,
+                                 variables,
+                                 method = c('median', 'mean', 'medpolish'),
                                  reference) {
   # check arguments
   missing.columns <- setdiff(variables, names(x))
@@ -65,13 +67,17 @@ normalize.data.frame <- function(x, variables, method = c('median', 'mean', 'med
   if (method == 'medpolish' & !missing(reference))
     message('running median polish, "reference" will be ignored')
   if (method != 'medpolish') {
+    # get reference as logical vector
     if (!missing(reference)) {
+      reference <- substitute(reference)
       if (is.character(reference)) {
         # character string is parsed and evaluated within x
         Reference <- eval(parse(text = reference), x)
-      } else {
+      } else if (is.call(reference)) {
+        # call is evaluated within x
+        Reference <- eval(reference, x)
+      } else if (is.logical(reference)) {
         # logical vector is taken as is
-        # call (bare predicate) is taken as is (R 4.0+? TODO: check this)
         Reference <- reference
       }
     } else {
